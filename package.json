@@ -1,0 +1,9 @@
+{
+	"name": "codezoo",
+	"description": "A lightweight web based development platform for quick deployment and beginner programmers",
+	"version": "0.0.1",
+	"private": true,
+	"dependencies": {
+		"express": "3.16.2"
+	}
+}
