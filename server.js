@@ -1,7 +1,11 @@
 var express = require('express');
-var app = express();
+var mime = require('mime');
+var url = require('url');
+var bodyParser = require('body-parser')
 var fs = require('fs');
 var path = require('path');
+
+var app = express();
 
 app.get('/edit/*', function(req, res) {
 	var filePath = returnFilePath(req, '/edit/', '/edit/'.length)
@@ -15,20 +19,27 @@ app.get('/edit/*', function(req, res) {
 });
 
 app.get('/view/*', function(req, res) {
-	var filePath = returnFilePath(req, '/edit/', '/edit/'.length)
+	var filePath = returnFilePath(req, '/storage/', '/view/'.length)
+	if (!fs.existsSync(filePath)) {
+		filePath = path.join(__dirname, '/static/404_newfile.html')
+	}
+
 	if (fs.statSync(filePath).isDirectory()) {
 		returnFile(path.join(__dirname, '/static/dir.html'), res);
 	}
 
-	returnFile(returnFilePath(req, '/view/', '/view/'.length), res);
+	returnFile(filePath, res);
 });
+
+app.use(bodyParser.json()); // to support JSON-encoded bodies
+app.use(bodyParser.urlencoded({
+	extended:true
+})); // to support URL-encoded bodies
 
 app.post('/write*', function(req, res) {
 	var filePath = req.body.path;
 	var content = req.body.content;
-
-	
-
+	console.log(req.body);
 });
 
 app.get('*', function(req, res, next) {
@@ -44,6 +55,7 @@ function returnFilePath(req, parentDir, substr_index) {
 	if (substr_index) {
 		uri = uri.substr(substr_index);
 	}
+
 	return path.join(__dirname, parentDir, uri);
 }
 

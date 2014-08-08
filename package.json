@@ -5,6 +5,7 @@
   "private": true,
   "dependencies": {
     "body-parser": "^1.6.2",
-    "express": "4.8.2"
+    "express": "4.8.2",
+    "mime": "^1.2.11"
   }
 }
