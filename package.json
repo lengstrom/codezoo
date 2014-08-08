@@ -1,9 +1,10 @@
 {
-	"name": "codezoo",
-	"description": "A lightweight web based development platform for quick deployment and beginner programmers",
-	"version": "0.0.1",
-	"private": true,
-	"dependencies": {
-		"express": "4.8.2"
-	}
+  "name": "codezoo",
+  "description": "A lightweight web based development platform for quick deployment and beginner programmers",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "body-parser": "^1.6.2",
+    "express": "4.8.2"
+  }
 }
