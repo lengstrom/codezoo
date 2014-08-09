@@ -180,7 +180,7 @@ var errorResponses = {
 
 var errorFiles = {
 	404:path.join(__dirname, '/static/errors/404.html'),
-	500:path.join(__dirname, '/static/errors/500.html')
+	500:path.join(__dirname, '/static/errors/500.html'),
 	550:path.join(__dirname, '/static/errors/550.html')
 };
 
