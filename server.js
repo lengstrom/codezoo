@@ -157,8 +157,14 @@ function returnFile(filePath, res, statusCode, dir) {
 
 				file = file.toString();
 				var ind = file.indexOf('<script type=\'text/javascript\'>');
-				file = file.substring(0, ind) + "<script type='text/javascript'>var dirs = " + JSON.stringify(files) + ";</script>" + file.substr(ind);
 
+				for (var i in files) {
+					if (fs.statSync(path.join(dir, files[i])).isDirectory()) {
+						files[i] += '/';
+					}
+				}
+
+				file = file.substring(0, ind) + "<script type='text/javascript'>var dirs = " + JSON.stringify(files) + ";</script>" + file.substr(ind);
 				res.writeHead(statusCode, headers);
 				res.write(new Buffer(file), "binary");
 				res.end();

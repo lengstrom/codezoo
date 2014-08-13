@@ -1,0 +1,20 @@
+body {
+	font-size:12px;
+	font-family:Monaco;
+	background-color:rgb(252, 252, 252);
+}
+
+.cols {
+	margin-top:20px;
+}
+
+.col {
+	background-color:rgb(252, 252, 252);
+	position:absolute;
+	overflow:hidden;
+	white-space:nowrap;
+}
+
+.title {
+	font-size: 30px;
+}
