@@ -8,45 +8,54 @@
 		<div class = 'cols'>
 		</div>
 		<script type='text/javascript' src='/static/js/jquery.js'></script>
+		<script type='text/javascript' src='/static/js/helpers.js'></script>
 		<script type='text/javascript'>
 			var dirs = ["8-Bit Sprite Editor/","AHRS","AP-CS-Notes","APstats","Algorithm Design and Analysis","Autonomous","BBB-eMMC-flasher-ubuntu-14.04-console-armhf-2014-07-06-2gb.img","Bestfit","CCtest","Converter","Copy","DerpSpace","GridWorldCode","IRC Bot","IRC Client","Intron-Exon Parsing","JS-Find","JavaScript-Particle-System-master","Last Week Tonight with John Oliver - Prison (HBO)-_Pz3syET3DY.mp4","Level editor","Logan Engstrom","MLBOOK.pdf","MathEvaluator","Needleman-Wunsch","Newick-Tree-Grapher","Newton-Cotes","Newton-Cotes copy","OryxSideScroller","PhsyiscsTestv2","PhysicsTest/","Robot-C-Docs/","SATMailerDaemon","STEM-2014","Unified","arduino","asdf.hxt","bb_mpu9150","codezoo","codezoo-db","curtis","d3","d3_tests/","dash2trustee/","dat-gui/","desmos_grapher/","diff","ftc-reg","game-off-2013","geartickswebsite","hextris","hextris-builds","htspb-i2c","i2c-tools-3.1","iPass-App","iPass-WA2/","ipwa/","ipwa_iPhone/","js13k/","lexhack.github.io/","lspc.github.io/","meadowstream.github.io","misc-code","n Body Simulation","needle2gff","neusplash/","node-docs-trustee","noflo","pcJS","personalwebsite","pixi.js","polygongame","problematicparticles/","pyramid","robotics-ml/","sat.pdf","satqotd","scraping","snowday-plot","stemandleaf","stop_ipass/","test","trustee","trustee-docs-channel","trustee-python-docs","trustee.wiki","vowpal_wabbit","webkitbuilds","website-hextris","wget-log","wiexpression","witermoutput","withBox2D"];
 
-			
+			setUpUI();
 			$(window).on('resize', function() {
 				loadDirs(dirs);
 			});
 
+			function setUpUI() {
+				$('.title').html(join('codezoo/',window.location.pathname));
+				setTimeout(function(){loadDirs(dirs)}, 1);
+			}
+
 			function loadDirs(dirList) {
-				dirList = dirList.sort(function(a,b){
-					var aDir = a.charAt(a.length-1) == '/';
-					var bDir = b.charAt(b.length-1) == '/';
+				var dirs = [];
+				var files = [];
 
-					if (aDir && !bDir) {
-						return 1;
+				for (var i in dirList) {
+					var t = dirList[i];
+					if (t.charAt(t.length - 1) == '/') {
+						dirs.push(t);
+					} else {
+						files.push(t);
 					}
+				}
 
-					if (bDir && !bDir) {
-						return -1;
-					}
+				console.log(dirs);
 
+				dirs = dirs.sort(function(a,b){
 					if (a < b) return -1;
 					if (a > b) return 1;
 					return 0;
 				});
 
-				console.log(dirList)
+				files = files.sort(function(a,b){
+					if (a < b) return -1;
+					if (a > b) return 1;
+					return 0;
+				});
 
 				var numCols = Math.floor(window.innerWidth / 340) || 1;
 
-				if (numCols == document.getElementsByClassName('col').length) {
-					return;
-				}
-
 				$('.cols').empty();
-				var dirsPerCol = Math.ceil(dirList.length/cols);
+				var dirsPerCol = Math.ceil(dirList.length/numCols 	);
 				var colWidth = ((1/numCols) * 100);
 				var cols = [];
-				var colWidthCSS = 'calc(' + colWidth + '% - 6px)';
+				var colWidthCSS = 'calc(' + colWidth + '% - 8px)';
 				for (var i = 0; i < numCols; i++) {
 					var col = $('<div>', {class:'col'});
 					col.css('margin-left', i * colWidth + '%');
@@ -56,36 +65,27 @@
 					cols.push(col);
 				}
 
-				for (var i = 0; i < dirList.length; i++) {
-					var item = $('<div>', {class:'item', text:dirList[i] + '  '});
-					item.append($('<a>', {class:'editText', text:'edit', href:join('/edit/', window.location.pathname.substr('/view/'.length), dirList[i])}))
-					cols[i % numCols].append(item);
+				dirs = dirs.concat(files);
+
+				for (var i = 0; i < dirs.length; i++) {
+					var colNum = Math.floor(i/dirsPerCol);
+					var item = $('<div>', {class:'item'});
+					var itemName = $("<span>", {class:'itemName', text:dirs[i], title:"Go to " + join(window.location.pathname, dirs[i])});
+					item.append(itemName);
+					// var auxClass = colNum == numCols - 1 ? 'auxText' : 'auxText bordered';
+					var auxText = $('<span>', {class:'', html:'&nbsp;'});
+					if (dirs[i].charAt(dirs[i].length - 1) != '/') {
+						var editText = $('<a>', {class:'editText', text:'edit', href:join('/edit/', window.location.pathname.substr('/view/'.length), dirs[i]), title:"Edit " + join(window.location.pathname, dirs[i])});
+
+						auxText.append(editText);
+					}
+
+					item.append(auxText);
+					cols[colNum].append(item);
+					if (item[0].offsetWidth < item[0].scrollWidth) {
+						auxText.attr('class','auxText');
+					}
 				}
-			}
-
-			setUpUI();
-
-			function join() {
-				var parts = [];
-				for (var i = 0, l = arguments.length; i < l; i++) {
-				parts = parts.concat(arguments[i].split("/"));
-				}
-
-				var newParts = [];
-				for (i = 0, l = parts.length; i < l; i++) {
-					var part = parts[i];
-					if (!part || part === ".") continue;
-					if (part === "..") newParts.pop();
-					else newParts.push(part);
-				}
-
-				if (parts[0] === "") newParts.unshift("");
-				return newParts.join("/") || (newParts.length ? "/" : ".");
-			}
-
-			function setUpUI() {
-				$('.title').html(join('codezoo/',window.location.pathname));
-				setTimeout(function(){loadDirs(dirs)}, 1);
 			}
 		</script>
 	</body>

@@ -18,3 +18,27 @@ body {
 .title {
 	font-size: 30px;
 }
+
+.auxText {
+	position:absolute;
+	right:0px;
+	padding-right: 5px;
+	background-color:#FFF;
+}
+
+a {
+	color:#3498db;
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+.itemName {
+	cursor:pointer;
+}
+
+.itemName:hover {
+	text-decoration: underline;
+}
