@@ -1,16 +1,33 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<link rel="stylesheet" type="text/css" href="/static/css/dirStyle.css">
+		<link rel="stylesheet" type="text/css" href="/static/css/dir.css">
+		<link rel="stylesheet" type="text/css" href="/static/css/style.css">
 	</head>
 	<body>
 		<div class = 'title'></div>
+		<div class = 'buttons'>
+			<div class = 'button'>make new file</div>
+		</div>
 		<div class = 'cols'>
+		</div>
+		<div id = 'newFile'>
+			<div class='header'>Make a new file</div>
+			<div>
+				Make a file named: <input type = 'text'/> <div class = 'button' style = 'display:inline-block;float:none;'>Go</div> <div class = 'button' style = 'display:inline-block;float:none;'>Show template menu</div>
+			</div>
+			<br>
+			<div> Copy from: <input type = 'text'/><div class = 'button' style = 'display:inline-block;float:none;'>Go</div></div>
+			<br>
+			<div id = 'files'></div>
+			<br>
+
 		</div>
 		<script type='text/javascript' src='/static/js/jquery.js'></script>
 		<script type='text/javascript' src='/static/js/helpers.js'></script>
 		<script type='text/javascript'>
-			var dirs = ["8-Bit Sprite Editor/","AHRS","AP-CS-Notes","APstats","Algorithm Design and Analysis","Autonomous","BBB-eMMC-flasher-ubuntu-14.04-console-armhf-2014-07-06-2gb.img","Bestfit","CCtest","Converter","Copy","DerpSpace","GridWorldCode","IRC Bot","IRC Client","Intron-Exon Parsing","JS-Find","JavaScript-Particle-System-master","Last Week Tonight with John Oliver - Prison (HBO)-_Pz3syET3DY.mp4","Level editor","Logan Engstrom","MLBOOK.pdf","MathEvaluator","Needleman-Wunsch","Newick-Tree-Grapher","Newton-Cotes","Newton-Cotes copy","OryxSideScroller","PhsyiscsTestv2","PhysicsTest/","Robot-C-Docs/","SATMailerDaemon","STEM-2014","Unified","arduino","asdf.hxt","bb_mpu9150","codezoo","codezoo-db","curtis","d3","d3_tests/","dash2trustee/","dat-gui/","desmos_grapher/","diff","ftc-reg","game-off-2013","geartickswebsite","hextris","hextris-builds","htspb-i2c","i2c-tools-3.1","iPass-App","iPass-WA2/","ipwa/","ipwa_iPhone/","js13k/","lexhack.github.io/","lspc.github.io/","meadowstream.github.io","misc-code","n Body Simulation","needle2gff","neusplash/","node-docs-trustee","noflo","pcJS","personalwebsite","pixi.js","polygongame","problematicparticles/","pyramid","robotics-ml/","sat.pdf","satqotd","scraping","snowday-plot","stemandleaf","stop_ipass/","test","trustee","trustee-docs-channel","trustee-python-docs","trustee.wiki","vowpal_wabbit","webkitbuilds","website-hextris","wget-log","wiexpression","witermoutput","withBox2D"];
+			$('#newFile').hide();
+			var dirs = ["button3.html","competition/","customize.html","dangerous/","dynamic.html","first.html","ftc.html","idonotknow.html","inputs.html","packedbombs.html","randomlinks.html","scamtest.html","sorryanothertest.css","test1/","thisisanothertest/","thisisatestofekdabbler.html","undefined","viralprize.html","worlddomination.html"];
 
 			setUpUI();
 			$(window).on('resize', function() {
@@ -22,7 +39,15 @@
 				setTimeout(function(){loadDirs(dirs)}, 1);
 			}
 
-			function loadDirs(dirList) {
+			function loadDirs(dirList, target, colWidthCutoff) { //
+				if (!target) {
+					target = $(".cols");
+				}
+
+				if (!colWidthCutoff) {
+					colWidthCutoff = 300;
+				}
+
 				var dirs = [];
 				var files = [];
 
@@ -34,8 +59,6 @@
 						files.push(t);
 					}
 				}
-
-				console.log(dirs);
 
 				dirs = dirs.sort(function(a,b){
 					if (a < b) return -1;
@@ -49,19 +72,19 @@
 					return 0;
 				});
 
-				var numCols = Math.floor(window.innerWidth / 340) || 1;
+				var numCols = Math.floor(target.width() / colWidthCutoff) || 1;
 
-				$('.cols').empty();
+				target.empty();
 				var dirsPerCol = Math.ceil(dirList.length/numCols 	);
 				var colWidth = ((1/numCols) * 100);
 				var cols = [];
-				var colWidthCSS = 'calc(' + colWidth + '% - 8px)';
+				var colWidthCSS = 'calc(' + colWidth + '% - 20px)';
 				for (var i = 0; i < numCols; i++) {
 					var col = $('<div>', {class:'col'});
 					col.css('margin-left', i * colWidth + '%');
 					col.css('width',colWidthCSS);
 					col.css('z-index', i + 1);
-					$('.cols').append(col);
+					target.append(col);
 					cols.push(col);
 				}
 
@@ -70,7 +93,7 @@
 				for (var i = 0; i < dirs.length; i++) {
 					var colNum = Math.floor(i/dirsPerCol);
 					var item = $('<div>', {class:'item'});
-					var itemName = $("<span>", {class:'itemName', text:dirs[i], title:"Go to " + join(window.location.pathname, dirs[i])});
+					var itemName = $("<span>", {class:'itemName', text:dirs[i], title:"View " + join(window.location.pathname, dirs[i])});
 					item.append(itemName);
 					// var auxClass = colNum == numCols - 1 ? 'auxText' : 'auxText bordered';
 					var auxText = $('<span>', {class:'', html:'&nbsp;'});
@@ -87,6 +110,11 @@
 					}
 				}
 			}
+
+			(function showNewfile() {
+				$('#newFile').show();
+				loadDirs(["button3.html","customize.html","dynamic.html","first.html","ftc.html","idonotknow.html","inputs.html","packedbombs.html","randomlinks.html","scamtest.html","sorryanothertest.css","thisisatestofekdabbler.html","undefined","viralprize.html","worlddomination.html"], $('#files'))
+			})();
 		</script>
 	</body>
 </html>

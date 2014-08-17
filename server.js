@@ -69,6 +69,10 @@ app.post('/write*', function(req, res) {
 		'Content-Type':'text/plain'
 	};
 
+	if (filePath.substring(0, '/edit/'.length) == '/edit/') {
+		filePath = filePath.substr('/edit/'.length);
+	}
+
 	var storageDir = path.join(__dirname, '/storage/');
 	filePath = path.join(storageDir, filePath);
 
