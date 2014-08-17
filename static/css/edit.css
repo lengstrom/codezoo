@@ -1,0 +1,52 @@
+body {
+	overflow: hidden;
+	color:#232323;
+	margin:0;
+	padding:0;
+	height:100%;
+	width:100%;
+	color:#232323;
+	font-size: 11pt;
+}
+
+#editor { 
+	margin: 0;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+}
+
+#lcol {
+	position:relative;
+	background-color:rgb(252, 252, 252);
+	float:left;
+	margin:0;
+	padding:0;
+	width:250px;
+	height:100%;
+	overflow: hidden;
+	overflow-y:scroll;
+}
+
+#rcol {
+	position:relative;
+	float:left;
+	margin:0;
+	width:400px;
+	height:100%;
+	border-top: 1px solid #232323;
+}
+
+#separator {
+	z-index:99;
+	position:relative;
+	background-color:rgb(252, 252, 252);
+	float:left;
+	padding:0;
+	margin:0;
+	width:6px;
+	height:100%;
+	cursor:ew-resize;
+}

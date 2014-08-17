@@ -1,0 +1,47 @@
+.cols {
+	margin-left:10px;
+}
+
+.col {
+	background-color:rgb(252, 252, 252);
+	position:absolute;
+	width:calc(100% - 15px);
+	overflow:hidden;
+	white-space:nowrap;
+}
+
+.auxText {
+	position:absolute;
+	right:0px;
+	padding-right: 5px;
+	background-color: rgb(252, 252, 252);
+}
+
+.item {
+	margin-bottom: 3px;
+}
+
+.itemName {
+	cursor:pointer;
+}
+
+.itemName:hover {
+	text-decoration: underline;
+}
+
+#newFile {
+	position:absolute;
+	left:50%;
+	top:50%;
+	width:660px;
+	height:360px;
+	margin-left:-350px;
+	margin-top:-200px;
+	z-index: 3;
+	background-color:rgb(252, 252, 252);
+	border:2px solid #232323;
+	padding: 20px;
+}
+
+#files {
+}
