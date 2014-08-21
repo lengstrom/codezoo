@@ -117,7 +117,6 @@ function returnFilePath(req, parentDir, substr_index) {
 	if (typeof(req) == 'string') {
 		uri = req;
 	}
-
 	else {
 		uri = url.parse(req.url).pathname;
 	}
@@ -197,7 +196,7 @@ var errorFiles = {
 function handleError(res, type, html, path) {
 	// 404 = not found
 	// 500 = internal error
-	// 550 = permission dnied
+	// 550 = permission denied
 	var headers = {}
 	if (html) {
 		headers['Content-Type'] = 'text/html';

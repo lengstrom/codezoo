@@ -12,14 +12,15 @@
 		<div class = 'cols'>
 		</div>
 		<div id = 'newFile'>
+			<div id = 'close' class = 'button' style='float:none; position:absolute;margin:0;top:7px;left:7px;'>Close</div>
 			<div class='header'>Make a new file</div>
 			<div>
-				<span class = 'nomono'> Make a file named:</span> <input id = 'fileToMake' placeholder='untitled.js' type = 'text'/> <div class = 'button' style = 'display:inline-block;float:none;'>Go</div> <div class = 'button' id = 'toggleTemplates' style = 'display:inline-block;float:none;'>Show templates</div>
+				<span class = 'nomono'> Make a file named:</span> <input id = 'fileToMake' placeholder='untitled.js' type = 'text'/> <div id = 'goButton' class = 'button' style = 'display:inline-block;float:none;'>Go</div> <div class = 'button' id = 'toggleTemplates' style = 'display:inline-block;float:none;'>Show templates</div>
 			</div>
 			<br>
 			<div id = 'templates'>
 				<hr>
-				<div> <span>Load from: </span><input type = 'text' id = 'templateDir' placeholder='/logan/templates/' value='/logan/templates/'/><div class = 'button' style = 'margin-left:18px;display:inline-block;float:none;'>Load</div></div>
+				<div> <span>Load from: </span><input type = 'text' id = 'templateDir' placeholder='/logan/templates/' value='/logan/templates/'/><div class = 'button' id = 'loadButton' style = 'margin-left:18px;display:inline-block;float:none;'>Load</div></div>
 				<br>
 				<div id = 'files'></div>
 			</div>
@@ -44,14 +45,19 @@
 					}).appendTo('body').fadeOut(1000).queue(function () { $(this).remove(); });
 				});
 			}
-
+			$("#templates").hide();
 			$('#newFile').hide();
 			$('#toggleTemplates').click(toggleTemplates);
+			$('#close').click(function(){$('#newFile').hide();});
 			var dirs = ["button3.html","competition/","customize.html","dangerous/","dynamic.html","first.html","ftc.html","idonotknow.html","inputs.html","packedbombs.html","randomlinks.html","scamtest.html","sorryanothertest.css","test1/","thisisanothertest/","thisisatestofekdabbler.html","undefined","viralprize.html","worlddomination.html"];
 
 			setUpUI();
 			$(window).on('resize', function() {
 				loadDirs(dirs);
+			});
+
+			$('#loadButton').click(function() {
+				$.get("/listDir",{});
 			});
 
 			function setUpUI() {
@@ -146,7 +152,7 @@
 						debugger;
 						q = prevVal.lastIndexOf('/');
 						prevVal = prevVal.substr(0, q);
-						$('#fileToMake').val(prevVal + (prevVal != '' && prevVal.charAt(prevVal.length - 1) != '/' ? '/' : '')+ subPath);
+						$('#fileToMake').val(prevVal + (prevVal != '' && prevVal.charAt(prevVal.length - 1) != '/' ? '/' : '') + subPath);
 						$('#fileToMake').highlight();
 					});
 				}
@@ -154,19 +160,19 @@
 
 			(function showNewfile() {
 				$('#newFile').show();
-				loadDirs(["button3.html","customize.html","dynamic.html","first.html","ftc.html","idonotknow.html","inputs.html","packedbombs.html","randomlinks.html","scamtest.html","sorryanothertest.css","thisisatestofekdabbler.html","undefined","viralprize.html","worlddomination.html"], $('#files'))
 			})();
 
 			function toggleTemplates() {
 				var templates = $("#templates");
 				var toggleTemplates = $("#toggleTemplates");
+				templates.toggle();
 				if (templates.is(':visible')) {
 					toggleTemplates.html('Hide templates');
+					$('#newFile').css('height','360px');
 				} else {
 					toggleTemplates.html('Show templates');
+					$('#newFile').css('height','65px');
 				}
-
-				templates.toggle();
 			}
 		</script>
 	</body>
