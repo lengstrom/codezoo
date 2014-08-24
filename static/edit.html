@@ -40,20 +40,36 @@
 			$('#toggleSplit').bind('click', toggleColumns);
 			$('#save').bind('click', save);
 			$('#done').bind('click', done);
-
 			$('.title').html(join('codezoo/',window.location.pathname));
-			var editor = ace.edit("editor");
-			editor.setOption("showPrintMargin", false);
-			editor.setTheme("ace/theme/dawn");
-			switch (window.location.pathname.substr(window.location.pathname.lastIndexOf('.')).toLowerCase()) {
-				case '.html':
-				case '.js':
-				case '.css':
-				case '.json'
+			initializeEditor();
+
+			function initializeEditor() {
+				var editor = ace.edit("editor");
+				editor.setOption("showPrintMargin", false);
+				editor.setTheme("ace/theme/dawn");
+				var mode = '';
+				switch (window.location.pathname.substr(window.location.pathname.lastIndexOf('.')).toLowerCase()) {
+					case '.html':
+						mode = 'ace/mode/html';
+						break;
+
+					case '.js':
+						mode = 'ace/mode/javascript';
+						break;
+
+					case '.css':
+						mode = 'ace/mode/css';
+						break;
+
+					case '.json':
+						mode = 'ace/mode/json';
+						break;
+				}
+
+				editor.getSession().setMode(mode);
+				editor.setValue(contents, -1);
+				editor.focus();
 			}
-			editor.getSession().setMode("ace/mode/javascript");
-			editor.setValue(contents, -1);
-			editor.focus();
 
 			function saveFile(cb) {
 				$.post('/write',{content:editor.getSession().getValue(), path:window.location.pathname}, cb);
