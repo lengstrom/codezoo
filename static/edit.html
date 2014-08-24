@@ -80,7 +80,7 @@
 					},
 					success:function() {
 						alert("save worked");
-						window.location = '/view/' + window.location.pathname.substr('/edit/'.length);
+						window.location = '/view' + window.location.pathname.substr('/edit'.length);
 					},
 					dataType:'JSON'
 				});

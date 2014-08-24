@@ -16,17 +16,19 @@ app.get('/', function(req, res) {
 });
 
 app.get('/edit*', function(req, res) {
-	var filePath = returnFilePath(req, '/edit/', '/edit/'.length)
-	if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
-		var uri = url.parse(req.url).pathname;
-		res.redirect(path.join('/view', uri.substr('/edit/').length));
-	} else {
-		returnFile(path.join(__dirname,'/static/edit.html'), res, 200, {file:filePath});
+	var filePath = returnFilePath(req, '/storage', '/edit'.length)
+	if (isFileInDirectory(filePath,path.join(__dirname, '/storage')), true) {
+		if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
+			var uri = url.parse(req.url).pathname;
+			res.redirect(path.join('/view', uri.substr('/edit').length));
+		} else {
+			returnFile(path.join(__dirname,'/static/edit.html'), res, 200, {file:filePath});
+		}
 	}
 });
 
 app.get('/view*', function(req, res) {
-	var filePath = returnFilePath(req, '/storage/', '/view/'.length)
+	var filePath = returnFilePath(req, '/storage', '/view'.length)
 	if (!fs.existsSync(filePath)) {
 		filePath = path.join(__dirname, '/static/404_newfile.html')
 	} else {
@@ -76,8 +78,8 @@ app.post('/write*', function(req, res) {
 		'Content-Type':'text/plain'
 	};
 
-	if (filePath.substring(0, '/edit/'.length) == '/edit/') {
-		filePath = filePath.substr('/edit/'.length);
+	if (filePath.substring(0, '/edit'.length) == '/edit') {
+		filePath = filePath.substr('/edit'.length);
 	}
 
 	filePath = path.join(storageDir, filePath);
@@ -106,7 +108,7 @@ app.post('/write*', function(req, res) {
 
 app.get('*', function(req, res, next) {
 	if (req.url.indexOf('/static') != 0) {
-		req.url = path.join('/static/', req.url);
+		req.url = path.join('/static', req.url);
 	}
 
 	var filePath = returnFilePath(req, '');
@@ -148,7 +150,6 @@ function returnFilePath(req, parentDir, substr_index) {
 }
 
 function returnFile(filePath, res, statusCode, opts) {
-	console.log('Returning file: ' + filePath);
 	if (!statusCode) {
 		statusCode = 200;
 	}

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<title>Directory View</title>
 		<link rel="stylesheet" type="text/css" href="/static/css/dir.css">
 		<link rel="stylesheet" type="text/css" href="/static/css/style.css">
 	</head>
@@ -29,6 +30,7 @@
 		<script type='text/javascript' src='/static/js/jquery.js'></script>
 		<script type='text/javascript' src='/static/js/helpers.js'></script>
 		<script type='text/javascript'>
+			document.title = window.location.pathname.substr('/view'.length) 
 			jQuery.fn.highlight = function () {
 				$(this).each(function () {
 					var el = $(this);
@@ -126,7 +128,7 @@
 					// var auxClass = colNum == numCols - 1 ? 'auxText' : 'auxText bordered';
 					var auxText = $('<span>', {class:'', html:'&nbsp;'});
 					if (subPath.charAt(subPath.length - 1) != '/' && notNewFile) {
-						var editText = $('<a>', {class:'editText', text:'edit', href:join('/edit/', window.location.pathname.substr('/view/'.length), subPath), title:"Edit " + join(window.location.pathname, subPath)});
+						var editText = $('<a>', {class:'editText', text:'edit', href:join('/edit', window.location.pathname.substr('/view'.length), subPath), title:"Edit " + join(window.location.pathname, subPath)});
 
 						auxText.append(editText);
 					}
