@@ -106,7 +106,17 @@ app.post('/write*', function(req, res) {
 });
 
 app.post('/copy*', function(req, res) {
+	var origin = path.join(storageDir,req.body.origin);
+	var target = path.join(storageDir,req.body.target);
+	var headers = {
+		'Content-Type':'text/plain'
+	};
 
+	if (isFileInDirectory(origin, storageDir, false) && isFileInDirectory(target, storageDir, true)) {
+		
+	} else {
+		handleError(res, 550, false);
+	}
 });
 
 app.get('*', function(req, res, next) {
