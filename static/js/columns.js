@@ -13,8 +13,10 @@ $(window).resize(windowResize);
 function toggleColumns() {
 	if ($('#separator').is(":visible")) {
 		hideColumns();
+		$('#toggleSplit').html('show preview');
 	} else {
 		showColumns();
+		$('#toggleSplit').html('hide preview');
 	}
 }
 

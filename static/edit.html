@@ -13,7 +13,7 @@
 		<div class = 'buttons'>
 			<div class = 'button' id = 'done'>done</div>
 			<div class = 'button' id = 'save'>save</div>
-			<div class = 'button' id = 'toggleSplit'>toggle preview</div>
+			<div class = 'button' id = 'toggleSplit'>show preview</div>
 		</div>
 		<div id = 'lcol'>
 		<pre id = 'editor'></pre>
@@ -44,7 +44,7 @@
 			initializeEditor();
 
 			function initializeEditor() {
-				var editor = ace.edit("editor");
+				window.editor = ace.edit("editor");
 				editor.setOption("showPrintMargin", false);
 				editor.setTheme("ace/theme/dawn");
 				var mode = '';
