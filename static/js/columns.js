@@ -20,10 +20,11 @@ function toggleColumns() {
 
 function showColumns() {
 	if (prevSepPos == -1) {
-		// save(showColumns);
+		save(showColumns);
 		prevSepPos = 0;
-		// return;
+		return;
 	}
+
 	var winWidth = $(window).width();
 	$('#separator').show();
 	$('#preview').attr('src', '/view/' + window.location.pathname.substr('/edit/'.length));

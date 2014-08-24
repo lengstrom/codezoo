@@ -8,7 +8,7 @@ var path = require('path');
 var app = express();
 var storageDir = path.join(__dirname, '/storage/');
 
-app.get('/edit/*', function(req, res) {
+app.get('/edit*', function(req, res) {
 	var filePath = returnFilePath(req, '/edit/', '/edit/'.length)
 	if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
 		var uri = url.parse(req.url).pathname;
@@ -18,7 +18,7 @@ app.get('/edit/*', function(req, res) {
 	}
 });
 
-app.get('/view/*', function(req, res) {
+app.get('/view*', function(req, res) {
 	var filePath = returnFilePath(req, '/storage/', '/view/'.length)
 	if (!fs.existsSync(filePath)) {
 		filePath = path.join(__dirname, '/static/404_newfile.html')
@@ -26,6 +26,7 @@ app.get('/view/*', function(req, res) {
 		if (isFileInDirectory(filePath,path.join(__dirname, '/storage'))) {
 			if (fs.statSync(filePath).isDirectory()) {
 				returnFile(path.join(__dirname, '/static/dir.html'), res, 200, filePath);
+				console.log('error handle');
 			} else {
 				returnFile(filePath, res, 200);
 			}
@@ -98,12 +99,18 @@ app.post('/write*', function(req, res) {
 
 
 app.get('*', function(req, res, next) {
-	var filePath = returnFilePath(req, '/static/');
-	if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
-		filePath = path.join(filePath,'/index.html');
+	var filePath = returnFilePath(req, '');
+	if (isFileInDirectory(filePath, path.join(__dirname, '/static'), false)) {
+		if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
+			filePath = path.join(filePath,'/index.html');
+		}
+
+		returnFile(filePath, res, 200);
+	}
+	else {
+		handleError(res, 550, true, filePath);
 	}
 
-	returnFile(filePath, res, 200);
 });
 
 var server = app.listen(8081, function() {
