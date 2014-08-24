@@ -26,7 +26,6 @@ app.get('/view*', function(req, res) {
 		if (isFileInDirectory(filePath,path.join(__dirname, '/storage'))) {
 			if (fs.statSync(filePath).isDirectory()) {
 				returnFile(path.join(__dirname, '/static/dir.html'), res, 200, filePath);
-				console.log('error handle');
 			} else {
 				returnFile(filePath, res, 200);
 			}
