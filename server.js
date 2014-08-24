@@ -72,7 +72,6 @@ app.use(bodyParser.urlencoded({ // to support URL-encoded bodies
 }));
 
 app.post('/write*', function(req, res) {
-	debugger;
 	var filePath = req.body.path;
 	var content = req.body.content;
 	var headers = {
@@ -106,6 +105,9 @@ app.post('/write*', function(req, res) {
 	}
 });
 
+app.post('/copy*', function(req, res) {
+
+});
 
 app.get('*', function(req, res, next) {
 	if (req.url.indexOf('/static') != 0) {
@@ -254,8 +256,7 @@ function handleError(res, type, html, path) {
 }
 
 function getURLParts(req) {
-	var url_parts = url.parse(req.url, true);
-	var query = url_parts.query;
+	return url_parts = url.parse(req.url, true).query;
 }
 
 function isFileInDirectory(file, dir, notTopLevel) {

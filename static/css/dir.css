@@ -10,6 +10,11 @@
 	white-space:nowrap;
 }
 
+.newFileSelected {
+	border: 1px solid #232323;
+	padding: 2px;
+}
+
 .auxText {
 	position:absolute;
 	right:0px;

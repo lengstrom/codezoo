@@ -20,3 +20,7 @@ function getWritePath() {
 	var currentPath = window.location.pathname;
 	return currentPath.substr(currentPath.indexOf('/edit/') + '/edit/'.length)
 }
+
+function saveFile(cb) {
+	$.post('/write',{content:editor.getSession().getValue(), path:window.location.pathname}, cb);
+}

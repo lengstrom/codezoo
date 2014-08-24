@@ -8,24 +8,27 @@
 	<body>
 		<div class = 'title'></div>
 		<div class = 'buttons'>
-			<div class = 'button'>make new file</div>
+			<div class = 'button' id = 'newFileBtn'>new file</div>
 		</div>
-		<div class = 'cols'>
-		</div>
+		<div class = 'cols'></div>
 		<div id = 'newFile'>
-			<div id = 'close' class = 'button' style='float:none; position:absolute;margin:0;top:7px;left:7px;'>Close</div>
+			<div id = 'close' class = 'button' style='float:none; position:absolute;margin:0;top:7px;left:7px;'>close</div>
 			<div class='header'>Make a new file</div>
 			<div>
-				<span class = 'nomono'> Make a file named:</span> <input id = 'fileToMake' placeholder='untitled.js' type = 'text'/> <div id = 'goButton' class = 'button' style = 'display:inline-block;float:none;'>Go</div> <div class = 'button' id = 'toggleTemplates' style = 'display:inline-block;float:none;'>Show templates</div>
+				<span class = 'nomono'> Make a file named:</span> <input id = 'fileToMake' placeholder='untitled.js' type = 'text'/> <div id = 'goButton' class = 'button' style = 'display:inline-block;float:none;'>go</div> <div class = 'button' id = 'toggleTemplates' style = 'display:inline-block;float:none;'>show copy menu</div>
 			</div>
 			<br>
 			<div id = 'templates'>
 				<hr>
-				<div> <span>Load from: </span><input type = 'text' id = 'templateDir' placeholder='/logan/templates/' value='/logan/templates/'/><div class = 'button' id = 'loadButton' style = 'margin-left:18px;display:inline-block;float:none;'>Load</div></div>
+				<div>
+					<span>Load from: </span>
+					<input type = 'text' id = 'templateDir' placeholder='/logan/templates/' value='/logan/templates/'/>
+					<div class = 'button' id = 'loadFromDirButton' style = 'margin-left:11px;display:inline-block;float:none;'>load</div>
+					<div class = 'button' id = 'clearSelection' style = 'margin-left:11px;display:inline-block;float:none;'>clear selection</div>
+				</div>
 				<br>
 				<div id = 'files'></div>
 			</div>
-
 		</div>
 		<script type='text/javascript' src='/static/js/jquery.js'></script>
 		<script type='text/javascript' src='/static/js/helpers.js'></script>
@@ -47,9 +50,31 @@
 					}).appendTo('body').fadeOut(1000).queue(function () { $(this).remove(); });
 				});
 			}
+
+			$("#goButton").click(function(){
+				var copyOrigin = false;
+				var target = $("#fileToMake").val();
+				target = '/edit' + target.charAt(0) == '/' ? target : join(window.location.pathname.substr('/view'.length),target);
+				if ($('.itemName',$('.newFileSelected')).length === 1) {
+					copyOrigin = $('.itemName',$('.newFileSelected'))[0].fullPath;
+				}
+
+				if (copyOrigin) {
+					$.post('/copy', {origin:copyOrigin, target:target.substr('/edit'.length)}, function(){
+						window.location = '/edit' + target;
+					});
+				} else {
+					window.location = target;
+				}
+			});
+
+			$('#clearSelection').click(function() {
+				$('.item').removeClass('newFileSelected');
+			});
+
 			$("#templates").hide();
 			$('#newFile').hide();
-			$('#toggleTemplates').click(toggleTemplates);
+			$('#toggleTemplates').click(showCopyMenu);
 			$('#close').click(function(){$('#newFile').hide();});
 
 			setUpUI();
@@ -57,16 +82,22 @@
 				loadDirs(dirs);
 			});
 
-			$('#loadButton').click(function() {
-				$.get("/listDir",{});
-			});
+			$('#loadFromDirButton').click(loadFromInput);
+			$('#newFileBtn').click(showNewfile);
+
+			function loadFromInput() {
+				var baseDir = $('#templateDir').val();
+				$.get("/listDir", {dir:baseDir}, function (data) {
+					loadDirs(data, $('#files'), 150, baseDir)
+				});
+			}
 
 			function setUpUI() {
 				$('.title').html(join('codezoo/',window.location.pathname));
 				setTimeout(function(){loadDirs(dirs)}, 1);
 			}
 
-			function loadDirs(dirList, target, colWidthCutoff) { //
+			function loadDirs(dirList, target, colWidthCutoff, baseDir) { //
 				var notNewFile = !target;
 
 				if (!target) {
@@ -102,9 +133,8 @@
 				});
 
 				var numCols = Math.floor(target.width() / colWidthCutoff) || 1;
-
 				target.empty();
-				var dirsPerCol = Math.ceil(dirList.length/numCols 	);
+				var dirsPerCol = Math.ceil(dirList.length/numCols);
 				var colWidth = ((1/numCols) * 100);
 				var cols = [];
 				var colWidthCSS = 'calc(' + colWidth + '% - 20px)';
@@ -121,7 +151,7 @@
 
 				for (var i = 0; i < dirs.length; i++) {
 					var subPath = dirs[i];
-					var colNum = Math.floor(i/dirsPerCol);
+					var colNum = Math.floor(i/numCols);
 					var item = $('<div>', {class:'item'});
 					var itemName = $("<span>", {class:'itemName', text:subPath, title:"View " + join(window.location.pathname, subPath)});
 					item.append(itemName);
@@ -129,12 +159,11 @@
 					var auxText = $('<span>', {class:'', html:'&nbsp;'});
 					if (subPath.charAt(subPath.length - 1) != '/' && notNewFile) {
 						var editText = $('<a>', {class:'editText', text:'edit', href:join('/edit', window.location.pathname.substr('/view'.length), subPath), title:"Edit " + join(window.location.pathname, subPath)});
-
 						auxText.append(editText);
 					}
 
 					item.append(auxText);
-					makeFileCallback(location, subPath, notNewFile, item);
+					makeFileCallback(location, subPath, notNewFile, item, baseDir);
 					cols[colNum].append(item);
 					if (item[0].offsetWidth < item[0].scrollWidth) {
 						auxText.attr('class','auxText');
@@ -142,7 +171,7 @@
 				}
 			}
 
-			function makeFileCallback(location, subPath, notNewFile, item) {
+			function makeFileCallback(location, subPath, notNewFile, item, baseDir) {
 				if (notNewFile) {
 					item.click(function(){
 						window.location = join(window.location.pathname, subPath);
@@ -150,30 +179,31 @@
 				} else {
 					item.click(function(){
 						var prevVal = $('#fileToMake').val();
-						debugger;
 						q = prevVal.lastIndexOf('/');
 						prevVal = prevVal.substr(0, q);
 						$('#fileToMake').val(prevVal + (prevVal != '' && prevVal.charAt(prevVal.length - 1) != '/' ? '/' : '') + subPath);
 						$('#fileToMake').highlight();
+						$('.item').removeClass('newFileSelected');
+						$(this).addClass('newFileSelected');
+						$(this)[0].fullPath = join(baseDir, subPath);
 					});
 				}
 			}
 
-			(function showNewfile() {
+			function showNewfile() {
 				$('#newFile').show();
-			})();
+			};
 
-			function toggleTemplates() {
+			showNewfile();
+			showCopyMenu();
+
+			function showCopyMenu() {
 				var templates = $("#templates");
 				var toggleTemplates = $("#toggleTemplates");
-				templates.toggle();
-				if (templates.is(':visible')) {
-					toggleTemplates.html('Hide templates');
-					$('#newFile').css('height','360px');
-				} else {
-					toggleTemplates.html('Show templates');
-					$('#newFile').css('height','65px');
-				}
+				templates.show();
+				toggleTemplates.remove();
+				$('#newFile').css('height','360px');
+				loadFromInput();
 			}
 		</script>
 	</body>

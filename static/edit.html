@@ -71,10 +71,6 @@
 				editor.focus();
 			}
 
-			function saveFile(cb) {
-				$.post('/write',{content:editor.getSession().getValue(), path:window.location.pathname}, cb);
-			}
-
 			function save() {
 				saveFile(function(){
 					if ($('#rcol').is(':visible')) {
