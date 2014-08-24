@@ -34,7 +34,7 @@ app.get('/view*', function(req, res) {
 	} else {
 		if (isFileInDirectory(filePath,path.join(__dirname, '/storage'))) {
 			if (fs.statSync(filePath).isDirectory()) {
-				returnFile(path.join(__dirname, '/static/dir.html'), res, 200, filePath);
+				returnFile(path.join(__dirname, '/static/dir.html'), res, 200, {dir:filePath});
 			} else {
 				returnFile(filePath, res, 200);
 			}
@@ -72,6 +72,7 @@ app.use(bodyParser.urlencoded({ // to support URL-encoded bodies
 }));
 
 app.post('/write*', function(req, res) {
+	debugger;
 	var filePath = req.body.path;
 	var content = req.body.content;
 	var headers = {
@@ -92,7 +93,7 @@ app.post('/write*', function(req, res) {
 			if (err) {
 				handleError(res, 500, false, filePath);
 			} else {
-				fs.write(filePath, content, function(err) {
+				fs.writeFile(filePath, content, function(err) {
 					if (err) {
 						handleError(res, 500, false, filePath);
 					} else {
@@ -167,6 +168,7 @@ function returnFile(filePath, res, statusCode, opts) {
 			var charset = mime.charsets.lookup(type);
 			headers['Content-Type'] = type + (charset ? '; charset=' + charset : '');
 		}
+
 		if (opts) {
 			if (opts.dir) { // if we're returning a directory page
 				fs.readdir(opts.dir, function(err, files) {
@@ -198,7 +200,7 @@ function returnFile(filePath, res, statusCode, opts) {
 						handleError(res, 500, true, opts.file);
 						return;
 					}
-	
+
 					file = file.toString();
 					var ind = file.indexOf('<script type=\'text/javascript\'>');
 					file = file.substring(0, ind) + "<script type='text/javascript'>var contents = " + JSON.stringify(editFile.toString()) + ";</script>" + file.substr(ind);
@@ -244,6 +246,7 @@ function handleError(res, type, html, path) {
 		else {
 			res.end(errorResponses[type]);
 		}
+
 		return;
 	}
 
@@ -260,7 +263,7 @@ function isFileInDirectory(file, dir, notTopLevel) {
 	dir = fs.realpathSync(dir);
 	var isInDir = file.indexOf(dir) == 0;
 	if (notTopLevel) {
-		return (isInDir && file.substr(dir.length + 1).indexOf('/') == -1);
+		return (isInDir && !(file.substr(dir.length + 1).indexOf('/') == -1));
 	} else {
 		return isInDir;
 	}

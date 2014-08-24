@@ -20,7 +20,7 @@ function toggleColumns() {
 
 function showColumns() {
 	if (prevSepPos == -1) {
-		save(showColumns);
+		saveFile(showColumns);
 		prevSepPos = 0;
 		return;
 	}

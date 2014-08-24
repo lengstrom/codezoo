@@ -16,12 +16,7 @@
 			<div class = 'button' id = 'toggleSplit'>toggle preview</div>
 		</div>
 		<div id = 'lcol'>
-<pre id="editor">function foo(items) {
-	var i;
-	for (i = 0; i &lt; items.length; i++) {
-		alert("Ace Rocks " + items[i]);
-	}
-}</pre>
+		<pre id = 'editor'></pre>
 		</div>
 		<div id = 'separator'>
 			<div style = 'width:7px;height:100%;position:absolute;border:#232323 1px solid;'>
@@ -41,7 +36,7 @@
 		<script type='text/javascript' src='/static/js/helpers.js'></script>
 		<script type='text/javascript' src='/static/js/columns.js'></script>
 		<script src="/static/js/ace/ace.js" type="text/javascript" charset="utf-8"></script>
-		<script>
+		<script type='text/javascript'>
 			$('#toggleSplit').bind('click', toggleColumns);
 			$('#save').bind('click', save);
 			$('#done').bind('click', done);
@@ -50,39 +45,31 @@
 			var editor = ace.edit("editor");
 			editor.setOption("showPrintMargin", false);
 			editor.setTheme("ace/theme/dawn");
+			switch (window.location.pathname.substr(window.location.pathname.lastIndexOf('.')).toLowerCase()) {
+				case '.html':
+				case '.js':
+				case '.css':
+				case '.json'
+			}
 			editor.getSession().setMode("ace/mode/javascript");
+			editor.setValue(contents, -1);
+			editor.focus();
 
-			function save(cb) {
-				$.ajax({
-					type:"POST",
-					url:'/write',
-					data:{
-						content:editor.getSession().getValue(),
-						path:window.location.pathname
-					},
-					success:function() {
-						alert('save worked')
-						if (typeof(cb) == 'function') {
-							cb();
-						}
-					},
-					dataType:'JSON'
+			function saveFile(cb) {
+				$.post('/write',{content:editor.getSession().getValue(), path:window.location.pathname}, cb);
+			}
+
+			function save() {
+				saveFile(function(){
+					if ($('#rcol').is(':visible')) {
+						document.getElementById('preview').contentWindow.location.reload();
+					}
 				});
 			}
 
 			function done() {
-				$.ajax({
-					type:"POST",
-					url:'/write',
-					data:{
-						content:editor.getSession().getValue(),
-						path:window.location.pathname
-					},
-					success:function() {
-						alert("save worked");
-						window.location = '/view' + window.location.pathname.substr('/edit'.length);
-					},
-					dataType:'JSON'
+				saveFile(function() {
+					window.location = '/view' + window.location.pathname.substr('/edit'.length);
 				});
 			}
 
