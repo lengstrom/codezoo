@@ -7,6 +7,9 @@ var fs = require('fs');
 var path = require('path');
 var app = express();
 var storageDir = path.join(__dirname, '/storage/');
+var morgan = require('morgan')
+
+app.use(morgan(':remote-addr :method :url'))
 
 app.get('/edit*', function(req, res) {
 	var filePath = returnFilePath(req, '/edit/', '/edit/'.length)
