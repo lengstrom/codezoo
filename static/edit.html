@@ -19,7 +19,7 @@
 <pre id="editor">function foo(items) {
 	var i;
 	for (i = 0; i &lt; items.length; i++) {
-			alert("Ace Rocks " + items[i]);
+		alert("Ace Rocks " + items[i]);
 	}
 }</pre>
 		</div>
@@ -34,7 +34,7 @@
 			</div>
 		</div>
 		<div id = 'rcol'>
-			<iframe id = 'preview' src = "http://microsoft.com" style = 'width:100%;height:100%;border:none;padding:0;margin:0;margin:3px;'></iframe>
+			<iframe id = 'preview' src = "" style = 'width:100%;height:100%;border:none;padding:0;margin:0;margin:3px;'></iframe>
 			<div id = 'cover' style = 'position:absolute;width:100%;height:100%;top:0;left:0;background-color:rgba(0, 0, 0, 0);z-index:-1;'></div>
 		</div>
 		<script type='text/javascript' src='/static/js/jquery.js'></script>
@@ -42,7 +42,7 @@
 		<script type='text/javascript' src='/static/js/columns.js'></script>
 		<script src="/static/js/ace/ace.js" type="text/javascript" charset="utf-8"></script>
 		<script>
-			$('#toggleSplit').bind('click', toggleSplit);
+			$('#toggleSplit').bind('click', toggleColumns);
 			$('#save').bind('click', save);
 			$('#done').bind('click', done);
 
@@ -52,11 +52,7 @@
 			editor.setTheme("ace/theme/dawn");
 			editor.getSession().setMode("ace/mode/javascript");
 
-			function toggleSplit() {
-
-			}
-
-			function save() {
+			function save(cb) {
 				$.ajax({
 					type:"POST",
 					url:'/write',
@@ -65,10 +61,11 @@
 						path:window.location.pathname
 					},
 					success:function() {
-						alert("save worked");
+						if (typeof(cb) == 'function') {
+							cb();
+						}
 					},
 					dataType:'JSON'
-
 				});
 			}
 
@@ -85,7 +82,6 @@
 						window.location = '/view/' + window.location.pathname.substr('/edit/'.length);
 					},
 					dataType:'JSON'
-
 				});
 			}
 

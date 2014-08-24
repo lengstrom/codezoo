@@ -1,3 +1,6 @@
+var prevSepPos = -1;
+hideColumns();
+
 $('#separator').bind('mousedown', function(e) {
 	document.body.style.cursor = 'ew-resize';
 	$('#cover').css('z-index', '2');
@@ -6,7 +9,42 @@ $('#separator').bind('mousedown', function(e) {
 
 $(window).bind('mouseup', separatorMouseUp);
 $(window).resize(windowResize);
-separatorMove(false, 300)
+
+function toggleColumns() {
+	if ($('#separator').is(":visible")) {
+		hideColumns();
+	} else {
+		showColumns();
+	}
+}
+
+function showColumns() {
+	if (prevSepPos == -1) {
+		// save(showColumns);
+		prevSepPos = 0;
+		// return;
+	}
+	var winWidth = $(window).width();
+	$('#separator').show();
+	$('#preview').attr('src', '/view/' + window.location.pathname.substr('/edit/'.length));
+	$('#rcol').show();
+	if (prevSepPos == 0) {
+		prevSepPos = winWidth/2;
+	}
+
+	if (prevSepPos >= winWidth - 50) {
+		prevSepPos = winWidth - 50;
+	}
+
+	separatorMove(false, prevSepPos);
+}
+
+function hideColumns() {
+	$('#separator').hide();
+	$('#preview').attr('src','');
+	$('#lcol').css('width', '100%');
+	$('#separator').hide();
+}
 
 function windowResize() {
 	$('#rcol').css('width', parseInt($(window).width(), 10) - parseInt($('#lcol').width(), 10) - 7 + 'px');
@@ -17,9 +55,12 @@ function separatorMove(e, s) {
 	if (e) {
 		num = e.clientX;
 	}
+
 	if (s) {
 		num = s
 	}
+
+	prevSepPos = num;
 	if (num < 150) { //set minimum width of left column to 150px
 		$('#lcol').css('width', '140px'); //go to the lowest possible value if it is trying to be dragged smaller
 		$('.searchbarCont').css('width' , '140px');

@@ -5,8 +5,8 @@ var url = require('url');
 var bodyParser = require('body-parser')
 var fs = require('fs');
 var path = require('path');
-
 var app = express();
+var storageDir = path.join(__dirname, '/storage/');
 
 app.get('/edit/*', function(req, res) {
 	var filePath = returnFilePath(req, '/edit/', '/edit/'.length)
@@ -73,9 +73,7 @@ app.post('/write*', function(req, res) {
 		filePath = filePath.substr('/edit/'.length);
 	}
 
-	var storageDir = path.join(__dirname, '/storage/');
 	filePath = path.join(storageDir, filePath);
-
 	if (filePath == undefined || content == undefined || filePath.charAt(filePath.length - 1) == '/') {
 		handleError(res, 500, false, filePath);
 	} else if (!isFileInDirectory(filePath, storageDir, true)) {
@@ -225,7 +223,7 @@ function isFileInDirectory(file, dir, notTopLevel) {
 	dir = fs.realpathSync(dir);
 	var isInDir = file.indexOf(dir) == 0;
 	if (notTopLevel) {
-		return isInDir && file.substr(dir.length + 1).indexOf('/') == -1;
+		return (isInDir && file.substr(dir.length + 1).indexOf('/') == -1);
 	} else {
 		return isInDir;
 	}
