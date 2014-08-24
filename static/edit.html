@@ -61,6 +61,7 @@
 						path:window.location.pathname
 					},
 					success:function() {
+						alert('save worked')
 						if (typeof(cb) == 'function') {
 							cb();
 						}

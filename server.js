@@ -10,14 +10,18 @@ var storageDir = path.join(__dirname, '/storage/');
 var morgan = require('morgan')
 
 app.use(morgan(':remote-addr :method :url'))
+app.get('/', function(req, res) {
+	res.redirect('/view/');
+	return;
+});
 
 app.get('/edit*', function(req, res) {
 	var filePath = returnFilePath(req, '/edit/', '/edit/'.length)
 	if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
 		var uri = url.parse(req.url).pathname;
-		res.redirect(path.join(__dirname, '/view/', uri.substr('/edit/').length));
+		res.redirect(path.join('/view', uri.substr('/edit/').length));
 	} else {
-		returnFile(path.join(__dirname,'/static/edit.html'), res, 200);
+		returnFile(path.join(__dirname,'/static/edit.html'), res, 200, {file:filePath});
 	}
 });
 
@@ -101,6 +105,10 @@ app.post('/write*', function(req, res) {
 
 
 app.get('*', function(req, res, next) {
+	if (req.url.indexOf('/static') != 0) {
+		req.url = path.join('/static/', req.url);
+	}
+
 	var filePath = returnFilePath(req, '');
 	if (isFileInDirectory(filePath, path.join(__dirname, '/static'), false)) {
 		if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
@@ -139,7 +147,8 @@ function returnFilePath(req, parentDir, substr_index) {
 	return path.join(__dirname, parentDir, uri);
 }
 
-function returnFile(filePath, res, statusCode, dir) {
+function returnFile(filePath, res, statusCode, opts) {
+	console.log('Returning file: ' + filePath);
 	if (!statusCode) {
 		statusCode = 200;
 	}
@@ -157,29 +166,47 @@ function returnFile(filePath, res, statusCode, dir) {
 			var charset = mime.charsets.lookup(type);
 			headers['Content-Type'] = type + (charset ? '; charset=' + charset : '');
 		}
-
-		if (dir) { // if we're returning a directory page
-			fs.readdir(dir, function(err, files) {
-				if (err) {
-					handleError(res, 500, true);
-					return;
-				}
-
-				file = file.toString();
-				var ind = file.indexOf('<script type=\'text/javascript\'>');
-
-				for (var i in files) {
-					if (fs.statSync(path.join(dir, files[i])).isDirectory()) {
-						files[i] += '/';
+		if (opts) {
+			if (opts.dir) { // if we're returning a directory page
+				fs.readdir(opts.dir, function(err, files) {
+					if (err) {
+						handleError(res, 500, true, opts.dir);
+						return;
 					}
-				}
-
-				file = file.substring(0, ind) + "<script type='text/javascript'>var dirs = " + JSON.stringify(files) + ";</script>" + file.substr(ind);
-				res.writeHead(statusCode, headers);
-				res.write(new Buffer(file), "binary");
-				res.end();
-			});
-			return;
+	
+					file = file.toString();
+					var ind = file.indexOf('<script type=\'text/javascript\'>');
+	
+					for (var i in files) {
+						if (fs.statSync(path.join(opts.dir, files[i])).isDirectory()) {
+							files[i] += '/';
+						}
+					}
+	
+					file = file.substring(0, ind) + "<script type='text/javascript'>var dirs = " + JSON.stringify(files) + ";</script>" + file.substr(ind);
+					res.writeHead(statusCode, headers);
+					res.write(new Buffer(file), "binary");
+					res.end();
+				});
+				return;
+			}
+	
+			if (opts.file) {
+				fs.readFile(opts.file, function(err, editFile) {
+					if (err) {
+						handleError(res, 500, true, opts.file);
+						return;
+					}
+	
+					file = file.toString();
+					var ind = file.indexOf('<script type=\'text/javascript\'>');
+					file = file.substring(0, ind) + "<script type='text/javascript'>var contents = " + JSON.stringify(editFile.toString()) + ";</script>" + file.substr(ind);
+					res.writeHead(statusCode, headers);
+					res.write(new Buffer(file), "binary");
+					res.end();
+				});
+				return;
+			}
 		}
 
 		res.writeHead(statusCode, headers);
