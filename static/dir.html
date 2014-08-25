@@ -47,21 +47,21 @@
 						"background-color": "#2ecc71",
 						"opacity": ".7",
 						"z-index": "9999999"
-					}).appendTo('body').fadeOut(1000).queue(function () { $(this).remove(); });
+					}).appendTo('body').fadeOut(1000).queue(function(){$(this).remove();});
 				});
-			}
+			};
 
 			$("#goButton").click(function(){
 				var copyOrigin = false;
 				var target = $("#fileToMake").val();
-				target = '/edit' + target.charAt(0) == '/' ? target : join(window.location.pathname.substr('/view'.length),target);
+				target = '/edit' + ((target.charAt(0) == '/') ? target : join(window.location.pathname.substr('/view'.length),target));
 				if ($('.itemName',$('.newFileSelected')).length === 1) {
-					copyOrigin = $('.itemName',$('.newFileSelected'))[0].fullPath;
+					copyOrigin = $('.newFileSelected')[0].fullPath;
 				}
-
+				debugger;
 				if (copyOrigin) {
 					$.post('/copy', {origin:copyOrigin, target:target.substr('/edit'.length)}, function(){
-						window.location = '/edit' + target;
+						window.location = target;
 					});
 				} else {
 					window.location = target;
@@ -162,6 +162,10 @@
 						auxText.append(editText);
 					}
 
+					if (!notNewFile) {
+						item[0].fullPath = join(baseDir, subPath);
+					}
+
 					item.append(auxText);
 					makeFileCallback(location, subPath, notNewFile, item, baseDir);
 					cols[colNum].append(item);
@@ -193,9 +197,6 @@
 			function showNewfile() {
 				$('#newFile').show();
 			};
-
-			showNewfile();
-			showCopyMenu();
 
 			function showCopyMenu() {
 				var templates = $("#templates");

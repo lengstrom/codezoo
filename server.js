@@ -5,9 +5,13 @@ var url = require('url');
 var bodyParser = require('body-parser')
 var fs = require('fs');
 var path = require('path');
+var morgan = require('morgan')
+var ncp = require('ncp').ncp;
+
 var app = express();
 var storageDir = path.join(__dirname, '/storage/');
-var morgan = require('morgan')
+
+ncp.limit = 16;
 
 app.use(morgan(':remote-addr :method :url'))
 app.get('/', function(req, res) {
@@ -113,7 +117,24 @@ app.post('/copy*', function(req, res) {
 	};
 
 	if (isFileInDirectory(origin, storageDir, false) && isFileInDirectory(target, storageDir, true)) {
-		
+		mkpath(target.substring(0, target.lastIndexOf('/')), function (err) {
+			if (err) {
+				if (err) {
+					handleError(res, 500, false);
+					return;
+				}
+			}
+
+			ncp(origin, target, function (err) {
+				if (err) {
+					handleError(res, 500, false);
+					return;
+				}
+
+				res.writeHead(200, headers);
+				res.end();
+			});
+		});
 	} else {
 		handleError(res, 550, false);
 	}
@@ -270,8 +291,8 @@ function getURLParts(req) {
 }
 
 function isFileInDirectory(file, dir, notTopLevel) {
-	file = fs.realpathSync(file);
-	dir = fs.realpathSync(dir);
+	file = path.resolve(file);
+	dir = path.resolve(dir);
 	var isInDir = file.indexOf(dir) == 0;
 	if (notTopLevel) {
 		return (isInDir && !(file.substr(dir.length + 1).indexOf('/') == -1));
