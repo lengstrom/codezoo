@@ -36,7 +36,7 @@ app.get('/edit*', function(req, res) {
 		}
 	} else {
 		var uri = url.parse(req.url).pathname;
-		res.redirect(path.join('/view', uri.substr('/edit'.length)));
+		res.redirect('/view');
 	}
 });
 
