@@ -160,6 +160,11 @@
 				}
 				$('.title').html(title);
 				setTimeout(function(){loadDirs(dirsToLoad)}, 1);
+				if (window.location.pathname.substr('/edit/'.length).lastIndexOf('/') < 1) {
+					$("#newFileBtn").hide();
+					$("#newDirBtn").hide();
+					$("#copyFilesBtn").hide();
+				}
 			}
 
 			function loadDirs(dirList, target, colWidthCutoff, baseDir) { //
