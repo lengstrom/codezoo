@@ -34,7 +34,8 @@ app.get('/edit*', function(req, res) {
 app.get('/view*', function(req, res) {
 	var filePath = returnFilePath(req, '/storage', '/view'.length)
 	if (!fs.existsSync(filePath)) {
-		filePath = path.join(__dirname, '/static/404_newfile.html')
+		filePath = path.join(__dirname, '/static/404_newfile.html');
+		returnFile(filePath, res, 200);
 	} else {
 		if (isFileInDirectory(filePath,path.join(__dirname, '/storage'))) {
 			if (fs.statSync(filePath).isDirectory()) {
