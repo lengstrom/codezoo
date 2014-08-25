@@ -27,13 +27,16 @@ app.get('/edit*', function(req, res) {
 		return;
 	}
 
-	if (isFileInDirectory(filePath,path.join(__dirname, '/storage')), true) {
+	if (isFileInDirectory(filePath,path.join(__dirname, '/storage'), true)) {
 		if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
 			var uri = url.parse(req.url).pathname;
 			res.redirect(path.join('/view', uri.substr('/edit'.length)));
 		} else {
 			returnFile(path.join(__dirname,'/static/edit.html'), res, 200, {file:filePath});
 		}
+	} else {
+		var uri = url.parse(req.url).pathname;
+		res.redirect(path.join('/view', uri.substr('/edit'.length)));
 	}
 });
 
