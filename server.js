@@ -21,6 +21,12 @@ app.get('/', function(req, res) {
 
 app.get('/edit*', function(req, res) {
 	var filePath = returnFilePath(req, '/storage', '/edit'.length)
+	if (filePath.charAt(filePath.length - 1) == '/') {
+		var uri = url.parse(req.url).pathname;
+		res.redirect(path.join('/view', uri.substr('/edit'.length)));
+		return;
+	}
+
 	if (isFileInDirectory(filePath,path.join(__dirname, '/storage')), true) {
 		if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
 			var uri = url.parse(req.url).pathname;
@@ -34,7 +40,7 @@ app.get('/edit*', function(req, res) {
 app.get('/view*', function(req, res) {
 	var filePath = returnFilePath(req, '/storage', '/view'.length)
 	if (!fs.existsSync(filePath)) {
-		filePath = path.join(__dirname, '/static/404_newfile.html');
+		filePath = path.join(__dirname, '/static/dir.html');
 		returnFile(filePath, res, 200);
 	} else {
 		if (isFileInDirectory(filePath,path.join(__dirname, '/storage'))) {
@@ -220,7 +226,7 @@ function returnFile(filePath, res, statusCode, opts) {
 						}
 					}
 	
-					file = file.substring(0, ind) + "<script type='text/javascript'>var dirs = " + JSON.stringify(files) + ";</script>" + file.substr(ind);
+					file = file.substring(0, ind) + "<script type='text/javascript'>var dirsToLoad = " + JSON.stringify(files) + ";</script>" + file.substr(ind);
 					res.writeHead(statusCode, headers);
 					res.write(new Buffer(file), "binary");
 					res.end();

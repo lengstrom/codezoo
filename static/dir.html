@@ -9,19 +9,21 @@
 		<div class = 'title'></div>
 		<div class = 'buttons'>
 			<div class = 'button' id = 'newFileBtn'>new file</div>
+			<div class = 'button' id = 'newDirBtn'>new folder</div>
+			<div class = 'button' id = 'copyFilesBtn'>copy files</div>
 		</div>
 		<div class = 'cols'></div>
-		<div id = 'newFile'>
-			<div id = 'close' class = 'button' style='float:none; position:absolute;margin:0;top:7px;left:7px;'>close</div>
+		<div id = 'newFile' class = 'newItem'>
+			<div id = 'closeFile' class = 'button' style='float:none; position:absolute;margin:0;top:7px;left:7px;'>close</div>
 			<div class='header'>Make a new file</div>
 			<div>
-				<span class = 'nomono'> Make a file named:</span> <input id = 'fileToMake' placeholder='untitled.js' type = 'text'/> <div id = 'goButton' class = 'button' style = 'display:inline-block;float:none;'>go</div> <div class = 'button' id = 'toggleTemplates' style = 'display:inline-block;float:none;'>show copy menu</div>
+				<span class = 'nomono'> Make a file named:</span> <input id = 'fileToMake' class = 'itemToMake' placeholder='untitled.js' type = 'text'/> <div id = 'goFileButton' class = 'button' style = 'display:inline-block;float:none;'>go</div> <div class = 'button' id = 'toggleTemplates' style = 'display:inline-block;float:none;'>show copy menu</div>
 			</div>
 			<br>
 			<div id = 'templates'>
 				<hr>
 				<div>
-					<span>Load from: </span>
+					<span>Choose a file or folder from: </span>
 					<input type = 'text' id = 'templateDir' placeholder='/logan/templates/' value='/logan/templates/'/>
 					<div class = 'button' id = 'loadFromDirButton' style = 'margin-left:11px;display:inline-block;float:none;'>load</div>
 					<div class = 'button' id = 'clearSelection' style = 'margin-left:11px;display:inline-block;float:none;'>clear selection</div>
@@ -30,10 +32,37 @@
 				<div id = 'files'></div>
 			</div>
 		</div>
+
+		<div id = 'newDir' class = 'newItem'>
+			<div id = 'closeDir' class = 'button' style='float:none; position:absolute;margin:0;top:7px;left:7px;'>close</div>
+			<div class='header'>Make a new folder</div>
+			<div>
+				<span class = 'nomono'> Make a folder named:</span> <input id = 'dirToMake' class = 'itemToMake' placeholder='untitled' type = 'text'/> <div id = 'goDirButton' class = 'button' style = 'display:inline-block;float:none;'>go</div>
+			</div>
+		</div>
+
 		<script type='text/javascript' src='/static/js/jquery.js'></script>
 		<script type='text/javascript' src='/static/js/helpers.js'></script>
 		<script type='text/javascript'>
-			document.title = window.location.pathname.substr('/view'.length) 
+			document.addEventListener('keydown', function(e) {
+				switch (e.keyCode) {
+					case 27:
+						$('#newFile').hide();
+						$('#newDir').hide();
+						break;
+
+					case 13:
+						if ($('#dirToMake').is(':focus')) {
+							goDir();
+						} else if ($('#fileToMake').is(':focus')) {
+							goFile();
+						} else if ($('#templateDir').is(':focus')) {
+							loadFromInput();
+						}
+						break;
+				}
+			});
+
 			jQuery.fn.highlight = function () {
 				$(this).each(function () {
 					var el = $(this);
@@ -51,22 +80,37 @@
 				});
 			};
 
-			$("#goButton").click(function(){
+			$('#goDirButton').click(goDir);
+
+			function goDir() {
+				var dirVal = $('#dirToMake').val();
+				if (dirVal != '') {
+					window.location = join(window.location.pathname, $('#dirToMake').val());
+				}
+			}
+
+			$('#newDirBtn').click(showNewDir);
+
+			$("#goFileButton").click(goFile);
+
+			function goFile(){
 				var copyOrigin = false;
 				var target = $("#fileToMake").val();
-				target = '/edit' + ((target.charAt(0) == '/') ? target : join(window.location.pathname.substr('/view'.length),target));
-				if ($('.itemName',$('.newFileSelected')).length === 1) {
-					copyOrigin = $('.newFileSelected')[0].fullPath;
-				}
-				debugger;
-				if (copyOrigin) {
-					$.post('/copy', {origin:copyOrigin, target:target.substr('/edit'.length)}, function(){
+				if (target != '') {
+					target = '/edit' + ((target.charAt(0) == '/') ? target : join(window.location.pathname.substr('/view'.length),target));
+					if ($('.itemName',$('.newFileSelected')).length === 1) {
+						copyOrigin = $('.newFileSelected')[0].fullPath;
+					}
+
+					if (copyOrigin) {
+						$.post('/copy', {origin:copyOrigin, target:target.substr('/edit'.length)}, function(){
+							window.location = target;
+						});
+					} else {
 						window.location = target;
-					});
-				} else {
-					window.location = target;
+					}
 				}
-			});
+			}
 
 			$('#clearSelection').click(function() {
 				$('.item').removeClass('newFileSelected');
@@ -74,12 +118,14 @@
 
 			$("#templates").hide();
 			$('#newFile').hide();
+			$('#newDir').hide();
 			$('#toggleTemplates').click(showCopyMenu);
-			$('#close').click(function(){$('#newFile').hide();});
+			$('#closeFile').click(function(){$('#newFile').hide();});
+			$('#closeDir').click(function(){$('#newDir').hide();});
 
 			setUpUI();
 			$(window).on('resize', function() {
-				loadDirs(dirs);
+				loadDirs(dirsToLoad);
 			});
 
 			$('#loadFromDirButton').click(loadFromInput);
@@ -93,11 +139,34 @@
 			}
 
 			function setUpUI() {
-				$('.title').html(join('codezoo/',window.location.pathname));
-				setTimeout(function(){loadDirs(dirs)}, 1);
+				var title = window.location.pathname.substr('/view'.length);
+				if (title == '') {
+					title = '/view';
+				}
+
+				document.title = title;
+
+				if (!('dirsToLoad' in window)) {
+					window.dirsToLoad = [];
+				}
+
+				var loc = window.location.pathname;
+				if (loc.charAt(loc.length - 1) != '/') {
+					loc = loc + '/';
+				}
+
+				if (!(loc.substr(1).indexOf('/') == loc.substr(1).lastIndexOf('/'))) {
+					dirsToLoad.push('../', './');
+				}
+				$('.title').html(title);
+				setTimeout(function(){loadDirs(dirsToLoad)}, 1);
 			}
 
 			function loadDirs(dirList, target, colWidthCutoff, baseDir) { //
+				if (!dirList) {
+					dirList = [];
+				}
+
 				var notNewFile = !target;
 
 				if (!target) {
@@ -153,11 +222,14 @@
 					var subPath = dirs[i];
 					var colNum = Math.floor(i/numCols);
 					var item = $('<div>', {class:'item'});
-					var itemName = $("<span>", {class:'itemName', text:subPath, title:"View " + join(window.location.pathname, subPath)});
+					var subPathText = (subPath == '../') ? '<span class="noHighlight">Go up to </span>' + window.location.pathname.substr(0, window.location.pathname.lastIndexOf('/')) : subPath;
+					if (subPath == './') {
+						subPathText = '';
+					}
+					var itemName = $("<span>", {class:'itemName' + ((subPath.charAt(subPath.length - 1) == '/') ? ' dirItem' : ''), html:subPathText, title:"View " + join(window.location.pathname, subPath)});
 					item.append(itemName);
-					// var auxClass = colNum == numCols - 1 ? 'auxText' : 'auxText bordered';
 					var auxText = $('<span>', {class:'', html:'&nbsp;'});
-					if (subPath.charAt(subPath.length - 1) != '/' && notNewFile) {
+					if (subPath.charAt(subPath.length - 1) != '/' && notNewFile && subPath != ' ') {
 						var editText = $('<a>', {class:'editText', text:'edit', href:join('/edit', window.location.pathname.substr('/view'.length), subPath), title:"Edit " + join(window.location.pathname, subPath)});
 						auxText.append(editText);
 					}
@@ -178,6 +250,15 @@
 			function makeFileCallback(location, subPath, notNewFile, item, baseDir) {
 				if (notNewFile) {
 					item.click(function(){
+						var loc = window.location.pathname;
+						if (loc.charAt(loc.length - 1) != '/') {
+							loc = loc + '/';
+						}
+
+						if (subPath == '../' && !(loc.substr(1).indexOf('/') == loc.substr(1).lastIndexOf('/'))) {
+							window.location = window.location.pathname.substr(0, window.location.pathname.lastIndexOf('/'))
+						}
+
 						window.location = join(window.location.pathname, subPath);
 					});
 				} else {
@@ -194,15 +275,25 @@
 				}
 			}
 
+			$('#copyFilesBtn').click(function(){
+				showNewfile();
+				showCopyMenu();
+			})
+
 			function showNewfile() {
 				$('#newFile').show();
+				$('#newDir').hide();
+			};
+
+			function showNewDir() {
+				$('#newDir').show();
+				$('#newFile').hide();
 			};
 
 			function showCopyMenu() {
 				var templates = $("#templates");
-				var toggleTemplates = $("#toggleTemplates");
 				templates.show();
-				toggleTemplates.remove();
+				$("#toggleTemplates").remove();
 				$('#newFile').css('height','360px');
 				loadFromInput();
 			}

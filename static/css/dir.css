@@ -40,12 +40,12 @@
 	text-decoration: underline;
 }
 
-#newFile {
+.newItem {
 	position:absolute;
 	left:50%;
 	top:50%;
 	width:660px;
-	height:065px;
+	height:65px;
 	margin-left:-350px;
 	margin-top:-200px;
 	z-index: 3;
@@ -54,10 +54,18 @@
 	padding: 20px;
 }
 
-#fileToMake {
-	width:190px;
+.itemToMake {
+	width:220px;
 }
 
 #templateDir {
 	width:181px;
+}
+
+.dirItem {
+	background-color: #ecf0f1;
+}
+
+.noHighlight {
+	background-color: rgb(252, 252, 252);
 }
