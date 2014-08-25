@@ -231,8 +231,15 @@ function returnFile(filePath, res, statusCode, opts) {
 			if (opts.file) {
 				fs.readFile(opts.file, function(err, editFile) {
 					if (err) {
-						handleError(res, 500, true, opts.file);
-						return;
+						if (err.code == 'ENOENT') { // file not found
+							res.writeHead(statusCode, headers);
+							res.write(file, 'binary');
+							res.end();
+							return;
+						} else {
+							handleError(res, 500, true, opts.file);
+							return;
+						}
 					}
 
 					file = file.toString();

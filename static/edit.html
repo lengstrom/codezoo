@@ -67,7 +67,12 @@
 				}
 
 				editor.getSession().setMode(mode);
-				editor.setValue(contents, -1);
+				if (contents) {
+					editor.setValue(contents, -1);
+				} else {
+					editor.setValue('', -1);
+				}
+
 				editor.focus();
 			}
 
