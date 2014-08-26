@@ -1,5 +1,6 @@
 var express = require('express');
 var mkpath = require('mkpath');
+var rimraf = require('rimraf');
 var mime = require('mime');
 var url = require('url');
 var bodyParser = require('body-parser')
@@ -116,6 +117,26 @@ app.post('/write*', function(req, res) {
 				});
 			}
 		});
+	}
+});
+
+app.post('/delete*', function(req, res) {
+	var target = path.join(storageDir,req.body.target);
+	var headers = {
+		'Content-Type':'text/plain'
+	};
+
+	if (isFileInDirectory(target, storageDir, false)) {
+		rimraf(target, function(err) {
+			if (err) {
+				handleError(res, 500, false);
+			} else {
+				res.writeHead(200, headers);
+				res.end();
+			}
+		});
+	} else {
+		handleError(res, 550, false);
 	}
 });
 

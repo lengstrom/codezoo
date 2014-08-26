@@ -160,7 +160,6 @@
 				}
 				$('.title').html(title);
 				setTimeout(function(){loadDirs(dirsToLoad)}, 1);
-				debugger;
 				if (loc.substring(0, '/view/'.length).length == 0) {
 					$("#newFileBtn").hide();
 					$("#copyFilesBtn").hide();
@@ -234,12 +233,22 @@
 					if (subPath == './') {
 						subPathText = '';
 					}
-					var itemName = $("<span>", {class:'itemName' + ((subPath.charAt(subPath.length - 1) == '/') ? ' dirItem' : ''), html:subPathText, title:"View " + join(window.location.pathname, subPath)});
+
+					var tPath = join(window.location.pathname, subPath).substr('/view'.length);
+					var itemName = $("<span>", {class:'itemName' + ((subPath.charAt(subPath.length - 1) == '/') ? ' dirItem' : ''), html:subPathText, title:"View " + tPath});
 					item.append(itemName);
+
 					var auxText = $('<span>', {class:'', html:'&nbsp;'});
 					if (subPath.charAt(subPath.length - 1) != '/' && notNewFile && subPath != ' ') {
-						var editText = $('<a>', {class:'editText', text:'edit', href:join('/edit', window.location.pathname.substr('/view'.length), subPath), title:"Edit " + join(window.location.pathname, subPath)});
+						var editText = $('<a>', {class:'editText', text:'edit', href:join('/edit', window.location.pathname.substr('/view'.length), subPath), title:"Edit " + tPath});
 						auxText.append(editText);
+					}
+
+					if (subPath != '../' && subPath != './') {
+						auxText.append($('<span>', {text:' '}));
+						var rmText = $('<a>', {class:'rmText', text:'remove', title:"Remove " + tPath});
+						makermCallback(rmText, tPath);
+						auxText.append(rmText);
 					}
 
 					if (!notNewFile) {
@@ -247,12 +256,20 @@
 					}
 
 					item.append(auxText);
-					makeFileCallback(location, subPath, notNewFile, item, baseDir);
+					makeFileCallback(location, subPath, notNewFile, itemName, baseDir);
 					cols[colNum].append(item);
 					if (item[0].offsetWidth < item[0].scrollWidth) {
 						auxText.attr('class','auxText');
 					}
 				}
+			}
+
+			function makermCallback(rmText, path) {
+				rmText.click(function(){
+					$.post('/delete', {target:path}, function(err) {
+						rmText.parent().parent().remove();
+					})
+				});
 			}
 
 			function makeFileCallback(location, subPath, notNewFile, item, baseDir) {

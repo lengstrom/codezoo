@@ -69,3 +69,8 @@
 .noHighlight {
 	background-color: rgb(252, 252, 252);
 }
+
+.rmText {
+	color:#e74c3c;
+	cursor: pointer;
+}
