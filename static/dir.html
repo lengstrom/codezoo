@@ -160,9 +160,13 @@
 				}
 				$('.title').html(title);
 				setTimeout(function(){loadDirs(dirsToLoad)}, 1);
-				if (window.location.pathname.substr('/edit/'.length).lastIndexOf('/') < 1) {
+				debugger;
+				if (loc.substring(0, '/view/'.length).length == 0) {
 					$("#newFileBtn").hide();
 					$("#copyFilesBtn").hide();
+				} else {
+					$("#newFileBtn").show();
+					$("#copyFilesBtn").show();
 				}
 			}
 
