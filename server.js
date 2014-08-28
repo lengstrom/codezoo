@@ -30,6 +30,7 @@ var userDict = {};
 	if (!fs.existsSync(userDir)) {
 		touch.sync(userDir);
 	}
+
 	var userList = fs.readFileSync(userDir).toString().split('\n').map(function(a){return a.split(',')});
 	for (var i in userList) {
 		userDict[i[0]] = i[1];
@@ -130,7 +131,7 @@ app.get('/edit*', function(req, res) {
 			var uri = url.parse(req.url).pathname;
 			res.redirect(path.join('/view', uri.substr('/edit'.length)));
 		} else {
-			returnFile(path.join(__dirname,'/static/edit.html'), res, 200, {file:filePath});
+			returnFile(path.join(__dirname,'/static/edit.html'), res, 200, req, {file:filePath, userStatus:true});
 		}
 	} else {
 		var uri = url.parse(req.url).pathname;
@@ -141,14 +142,13 @@ app.get('/edit*', function(req, res) {
 app.get('/view*', function(req, res) {
 	var filePath = returnFilePath(req, '/storage', '/view'.length)
 	if (!fs.existsSync(filePath)) {
-		filePath = path.join(__dirname, '/static/dir.html');
-		returnFile(filePath, res, 200);
+		returnFile(path.join(__dirname, '/static/dir.html'), res, 200, req, {userStatus:true});
 	} else {
 		if (isFileInDirectory(filePath,path.join(__dirname, '/storage'))) {
 			if (fs.statSync(filePath).isDirectory()) {
-				returnFile(path.join(__dirname, '/static/dir.html'), res, 200, {dir:filePath});
+				returnFile(path.join(__dirname, '/static/dir.html'), res, 200, req, {dir:filePath, userStatus: true});
 			} else {
-				returnFile(filePath, res, 200);
+				returnFile(filePath, res, 200, {userStatus:true});
 			}
 		} else {
 			handleError(res, 550, true);
@@ -306,7 +306,7 @@ function returnFilePath(req, parentDir, substr_index) {
 	return path.join(__dirname, parentDir, uri);
 }
 
-function returnFile(filePath, res, statusCode, opts) {
+function returnFile(filePath, res, statusCode, req, opts) {
 	if (!statusCode) {
 		statusCode = 200;
 	}
@@ -341,9 +341,16 @@ function returnFile(filePath, res, statusCode, opts) {
 							files[i] += '/';
 						}
 					}
-	
-					file = file.substring(0, ind) + "<script type='text/javascript'>var dirsToLoad = " + JSON.stringify(files) + ";</script>" + file.substr(ind);
+
+					initialJS = "var dirsToLoad = " + JSON.stringify(files) + ";";
+					initialJS += returnUserInfo(req);
+
+					file = file.substring(0, ind) + "<script type='text/javascript'>" + initialJS + "</script>" + file.substr(ind);
 					res.writeHead(statusCode, headers);
+					if (opts.user) {
+
+					}
+
 					res.write(new Buffer(file), "binary");
 					res.end();
 				});
@@ -366,8 +373,14 @@ function returnFile(filePath, res, statusCode, opts) {
 
 					file = file.toString();
 					var ind = file.indexOf('<script type=\'text/javascript\'>');
-					file = file.substring(0, ind) + "<script type='text/javascript'>var contents = " + JSON.stringify(editFile.toString()) + ";</script>" + file.substr(ind);
+					var initialJS = "var contents = " + JSON.stringify(file) + ';';
+					initialJS += returnUserInfo(req);
+					file = file.substring(0, ind) + "<script type='text/javascript'>" + initialJS + "</script>" + file.substr(ind);
 					res.writeHead(statusCode, headers);
+					if (opts.user) {
+
+					}
+
 					res.write(new Buffer(file), "binary");
 					res.end();
 				});
@@ -392,6 +405,14 @@ var errorFiles = {
 	500:path.join(__dirname, '/static/errors/500.html'),
 	550:path.join(__dirname, '/static/errors/550.html')
 };
+
+function returnUserInfo(req) {
+	if (req.user && req.user.id) {
+		return 'var user = ' + JSON.stringify({account:userDict[req.user.id]}) + ';'
+	} else {
+		return ''
+	}
+}
 
 function handleError(res, type, html, path) {
 	// 404 = not found
