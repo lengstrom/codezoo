@@ -58,7 +58,7 @@ passport.deserializeUser(function(obj, done) {
 passport.use(new GoogleStrategy({
 	clientID: GOOGLE_CLIENT_ID,
 	clientSecret: GOOGLE_CLIENT_SECRET,
-	callbackURL: WEB_ADDRESS + "/oauth2callback"
+	callbackURL: path.join(WEB_ADDRESS + "/oauth2callback")
 	},
 	function(accessToken, refreshToken, profile, done) {
 		// asynchronous verification, for effect...
