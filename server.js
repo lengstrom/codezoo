@@ -1,27 +1,89 @@
-var express = require('express');
-var mkpath = require('mkpath');
-var rimraf = require('rimraf');
-var mime = require('mime');
-var url = require('url');
-var bodyParser = require('body-parser')
-var fs = require('fs');
-var path = require('path');
-var morgan = require('morgan')
-var ncp = require('ncp').ncp;
+var express = require('express'),
+	passport = require('passport'),
+	mkpath = require('mkpath'),
+	methodOverride = require('method-override'),
+	cookieParser = require('cookie-parser')
+	rimraf = require('rimraf'),
+	GoogleStrategy = require('passport-google-oauth').OAuth2Strategy,
+	mime = require('mime'),
+	session = require('express-session'),
+	url = require('url'),
+	bodyParser = require('body-parser'),
+	fs = require('fs'),
+	path = require('path'),
+	morgan = require('morgan'),
+	ncp = require('ncp').ncp;
 
 var app = express();
 var storageDir = path.join(__dirname, '/storage/');
 
 ncp.limit = 16;
 
-app.use(morgan(':remote-addr :method :url'))
+var GOOGLE_CLIENT_ID = process.env.clientID;
+var GOOGLE_CLIENT_SECRET = process.env.clientSecret;
+
+passport.serializeUser(function(user, done) {
+	done(null, user);
+});
+
+passport.deserializeUser(function(obj, done) {
+	done(null, obj);
+});
+
+passport.use(new GoogleStrategy({
+	clientID: GOOGLE_CLIENT_ID,
+	clientSecret: GOOGLE_CLIENT_SECRET,
+	callbackURL: "http://192.241.184.177/oauth2callback"
+	},
+	function(accessToken, refreshToken, profile, done) {
+		// asynchronous verification, for effect...
+		process.nextTick(function () {
+			return done(null, profile);
+		});
+	}
+));
+
+
+app.use(morgan(':remote-addr :method :url'));
+app.use(bodyParser.json()); // to support JSON-encoded bodies
+app.use(bodyParser.urlencoded({ // to support URL-encoded bodies
+	extended:true
+}));
+
+app.use(cookieParser());
+app.use(methodOverride());
+app.use(session({secret:'keyboard cat'}));
+
+// Initialize Passport!  Also use passport.session() middleware, to support
+// persistent login sessions (recommended).
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(app.router);
+
+app.get('/oauth2callback', 
+	passport.authenticate('google', { failureRedirect: '/login' }),
+	function(req, res) {
+		res.redirect('/');
+	}
+);
+
+app.get('/auth/google',
+	passport.authenticate('google', {scope:['https://www.googleapis.com/auth/userinfo.profile','https://www.googleapis.com/auth/userinfo.email']}),
+	function(req, res){
+	// The request will be redirected to Google for authentication, so this
+	// function will not be called.
+	}
+);
+
+////
+
 app.get('/', function(req, res) {
 	res.redirect('/view/');
 	return;
 });
 
 app.get('/edit*', function(req, res) {
-	var filePath = returnFilePath(req, '/storage', '/edit'.length)
+	var filePath = returnFilePath(req, '/storage', '/edit'.length);
 	if (filePath.charAt(filePath.length - 1) == '/') {
 		var uri = url.parse(req.url).pathname;
 		res.redirect(path.join('/view', uri.substr('/edit'.length)));
@@ -80,11 +142,6 @@ app.get('/listDir*', function(req, res) {
 		});
 	}
 });
-
-app.use(bodyParser.json()); // to support JSON-encoded bodies
-app.use(bodyParser.urlencoded({ // to support URL-encoded bodies
-	extended:true
-}));
 
 app.post('/write*', function(req, res) {
 	var filePath = req.body.path;
