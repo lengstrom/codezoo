@@ -1,5 +1,6 @@
 var express = require('express'),
 	passport = require('passport'),
+	touch = require("touch"),
 	mkpath = require('mkpath'),
 	methodOverride = require('method-override'),
 	cookieParser = require('cookie-parser')
@@ -17,10 +18,33 @@ var express = require('express'),
 var app = express();
 var storageDir = path.join(__dirname, '/storage/');
 
-ncp.limit = 16;
-
 var GOOGLE_CLIENT_ID = process.env.clientID;
 var GOOGLE_CLIENT_SECRET = process.env.clientSecret;
+
+var WEB_ADDRESS = process.env.webAddress;
+
+ncp.limit = 16;
+var userDict = {};
+(function(){
+	var userDir = path.join(__dirname, 'users.csv');
+	if (!fs.existsSync(userDir)) {
+		touch.sync(userDir);
+	}
+	var userList = fs.readFileSync(userDir).toString().split('\n').map(function(a){return a.split(',')});
+	for (var i in userList) {
+		userDict[i[0]] = i[1];
+	}
+})();
+
+function addUser(id, userName) {
+	if (userList[id] != undefined) {
+		return false;
+	}
+
+	userList[id] = userName;
+	fs.appendFile(path.join(dirname__, 'users.csv'), '\n' + id + ',' + userName);
+	return true;
+}
 
 passport.serializeUser(function(user, done) {
 	done(null, user);
@@ -33,7 +57,7 @@ passport.deserializeUser(function(obj, done) {
 passport.use(new GoogleStrategy({
 	clientID: GOOGLE_CLIENT_ID,
 	clientSecret: GOOGLE_CLIENT_SECRET,
-	callbackURL: "http://192.241.184.177/oauth2callback"
+	callbackURL: WEB_ADDRESS + "/oauth2callback"
 	},
 	function(accessToken, refreshToken, profile, done) {
 		// asynchronous verification, for effect...
@@ -63,6 +87,7 @@ app.use(app.router);
 app.get('/oauth2callback', 
 	passport.authenticate('google', { failureRedirect: '/login' }),
 	function(req, res) {
+		addUser(req.user.id, 'logan');
 		res.redirect('/');
 	}
 );
@@ -74,6 +99,16 @@ app.get('/auth/google',
 	// function will not be called.
 	}
 );
+
+app.get('/logout', function(req, res){
+	req.logout();
+	res.redirect('/');
+});
+
+function ensureAuthenticated(req, res, next) {
+	if (req.isAuthenticated()) { return next(); }
+	res.redirect('/login');
+}
 
 ////
 
