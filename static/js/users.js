@@ -1,4 +1,4 @@
-if (user && user.username) {
+if ('user' in window) {
 	var account = $("<div>", {class:'button', text:'account'});
 	var logOut = $("<div>", {class:'button', text:'log out'});
 	account.click(function(){

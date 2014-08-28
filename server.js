@@ -83,7 +83,6 @@ app.use(session({secret:'keyboard cat'}));
 // persistent login sessions (recommended).
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(app.router);
 
 app.get('/oauth2callback', 
 	passport.authenticate('google', { failureRedirect: '/login' }),
