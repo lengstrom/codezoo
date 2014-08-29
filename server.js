@@ -38,12 +38,12 @@ var userDict = {};
 })();
 
 function addUser(id, userName) {
-	if (userList[id] != undefined) {
+	if (userDict[id] != undefined) {
 		return false;
 	}
 
-	userList[id] = userName;
-	fs.appendFile(path.join(dirname__, 'users.csv'), '\n' + id + ',' + userName);
+	userDict[id] = userName;
+	fs.appendFile(path.join(__dirname, 'users.csv'), '\n' + id + ',' + userName, function(){console.log('wrote user' + id + ':' + userName)});
 	return true;
 }
 
@@ -56,9 +56,9 @@ passport.deserializeUser(function(obj, done) {
 });
 
 passport.use(new GoogleStrategy({
-	clientID: GOOGLE_CLIENT_ID,
-	clientSecret: GOOGLE_CLIENT_SECRET,
-	callbackURL: path.join(WEB_ADDRESS + "/oauth2callback")
+		clientID: GOOGLE_CLIENT_ID,
+		clientSecret: GOOGLE_CLIENT_SECRET,
+		callbackURL: WEB_ADDRESS + "/oauth2callback"
 	},
 	function(accessToken, refreshToken, profile, done) {
 		// asynchronous verification, for effect...
@@ -84,19 +84,19 @@ app.use(session({secret:'keyboard cat'}));
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.get('/oauth2callback', 
-	passport.authenticate('google', { failureRedirect: '/login' }),
-	function(req, res) {
-		addUser(req.user.id, 'logan');
-		res.redirect('/');
-	}
-);
-
 app.get('/auth/google',
 	passport.authenticate('google', {scope:['https://www.googleapis.com/auth/userinfo.profile','https://www.googleapis.com/auth/userinfo.email']}),
 	function(req, res){
 	// The request will be redirected to Google for authentication, so this
 	// function will not be called.
+	}
+);
+
+app.get('/oauth2callback', 
+	passport.authenticate('google', { failureRedirect: '/login' }),
+	function(req, res) {
+		addUser(req.user.id, 'logan');
+		res.redirect('/');
 	}
 );
 
@@ -281,7 +281,7 @@ app.get('*', function(req, res, next) {
 
 });
 
-var server = app.listen(80, function() {
+var server = app.listen(8080, function() {
 	console.log("Listening on port %d", server.address().port);
 });
 
@@ -342,13 +342,12 @@ function returnFile(filePath, res, statusCode, req, opts) {
 					}
 
 					initialJS = "var dirsToLoad = " + JSON.stringify(files) + ";";
-					initialJS += returnUserInfo(req);
+					if (opts.userStatus) {
+						initialJS += returnUserInfo(req);
+					}
 
 					file = file.substring(0, ind) + "<script type='text/javascript'>" + initialJS + "</script>" + file.substr(ind);
 					res.writeHead(statusCode, headers);
-					if (opts.user) {
-
-					}
 
 					res.write(new Buffer(file), "binary");
 					res.end();
@@ -373,12 +372,13 @@ function returnFile(filePath, res, statusCode, req, opts) {
 					file = file.toString();
 					var ind = file.indexOf('<script type=\'text/javascript\'>');
 					var initialJS = "var contents = " + JSON.stringify(file) + ';';
-					initialJS += returnUserInfo(req);
+
+					if (opts.userStatus) {
+						initialJS += returnUserInfo(req);
+					}
+
 					file = file.substring(0, ind) + "<script type='text/javascript'>" + initialJS + "</script>" + file.substr(ind);
 					res.writeHead(statusCode, headers);
-					if (opts.user) {
-
-					}
 
 					res.write(new Buffer(file), "binary");
 					res.end();

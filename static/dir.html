@@ -42,7 +42,6 @@
 		</div>
 
 		<script type='text/javascript' src='/static/js/jquery.js'></script>
-		<script type="text/javascript" src='/static/js/users.js'></script>
 		<script type='text/javascript' src='/static/js/helpers.js'></script>
 		<script type='text/javascript'>
 			document.addEventListener('keydown', function(e) {
@@ -170,6 +169,21 @@
 				}
 			}
 
+			function isOwnerOfDir() {
+				var loc = window.location.pathname;
+				if (loc == '/view' || loc == '/view/') {
+					return -1;
+				}
+				loc = loc.substring('/view/'.length);
+				if (loc.charAt(loc.length - 1) != '/') loc += '/';
+				loc = loc.substring(0, loc.indexOf('/'));
+				if (loc == user.account) {
+					return 1;
+				} else {
+					return 0;
+				}
+			}
+
 			function loadDirs(dirList, target, colWidthCutoff, baseDir) { //
 				if (!dirList) {
 					dirList = [];
@@ -225,7 +239,7 @@
 				}
 
 				dirs = dirs.concat(files);
-
+				var isOwner = isOwnerOfDir();
 				for (var i = 0; i < dirs.length; i++) {
 					var subPath = dirs[i];
 					var colNum = Math.floor(i/numCols);
@@ -238,14 +252,13 @@
 					var tPath = join(window.location.pathname, subPath).substr('/view'.length);
 					var itemName = $("<span>", {class:'itemName' + ((subPath.charAt(subPath.length - 1) == '/') ? ' dirItem' : ''), html:subPathText, title:"View " + tPath});
 					item.append(itemName);
-
 					var auxText = $('<span>', {class:'', html:'&nbsp;'});
-					if (subPath.charAt(subPath.length - 1) != '/' && notNewFile && subPath != ' ') {
+					if ((isOwner == 1 || (isOwner == -1 && subPath == user.account + '/')) && subPath.charAt(subPath.length - 1) != '/' && notNewFile && subPath != ' ') {
 						var editText = $('<a>', {class:'editText', text:'edit', href:join('/edit', window.location.pathname.substr('/view'.length), subPath), title:"Edit " + tPath});
 						auxText.append(editText);
 					}
 
-					if (subPath != '../' && subPath != './') {
+					if ((isOwner == 1 || (isOwner == -1 && subPath == user.account + '/')) && subPath != '../' && subPath != './') {
 						auxText.append($('<span>', {text:' '}));
 						var rmText = $('<a>', {class:'rmText', text:'remove', title:"Remove " + tPath});
 						makermCallback(rmText, tPath);
@@ -324,5 +337,6 @@
 				loadFromInput();
 			}
 		</script>
+		<script type="text/javascript" src ='/static/js/users.js'></script>
 	</body>
 </html>
