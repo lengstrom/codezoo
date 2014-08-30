@@ -75,7 +75,7 @@
 
 				editor.focus();
 				var isOwner = isOwnerOfDir('/edit');
-				if (isOwner == 0 || 1) {
+				if (isOwner == 0) {
 					$('#toggleSplit').hide();
 					$('#save').hide();
 					editor.setOptions({
@@ -89,6 +89,7 @@
 				} else {
 					window.location = '/view/';
 				}
+				$('.title').html($('.title').html() + " [read only]")
 			}
 
 			function save() {
