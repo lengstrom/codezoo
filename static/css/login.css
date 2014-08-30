@@ -1,0 +1,51 @@
+#googleBtn:before {
+	position:absolute;
+	content: url('/img/hover.png');
+	width: 0;
+	height: 0;
+	visibility: hidden;
+}
+
+#googleBtn:before {
+	content: url(url("/img/press.png"));
+}
+
+#googleBtn {
+	cursor: pointer;
+	background: url("/img/press.png") no-repeat;
+	background: url("/img/hover.png") no-repeat;
+	background: url("/img/base.png") no-repeat;
+	width:256px;
+	height:54px;
+}
+
+#googleBtn:hover {
+	background: url("/img/hover.png") no-repeat;
+	width:256px;
+	height:54px;
+}
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) { 
+	#googleBtn:before {
+		position:absolute;
+		content: url('/img/hover2x.png');
+		width: 0;
+		height: 0;
+		visibility: hidden;
+	}
+	#googleBtn {
+		background: url("/img/hover2x.png") no-repeat;
+		background: url("/img/press2x.png") no-repeat;
+		background: url("/img/base2x.png") no-repeat;
+		background-size: 256px 54px;
+		width:256px;
+		height:52px;
+	}
+
+	#googleBtn:hover {
+		background: url("/img/hover2x.png") no-repeat;
+		background-size: 256px 54px;
+		width:256px;
+		height:52px;
+	}
+}

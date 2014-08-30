@@ -262,6 +262,22 @@ app.post('/copy*', function(req, res) {
 	}
 });
 
+app.get('/account*', function(req, res) {
+	if (!req.user) {
+		res.redirect('/login');
+	} else {
+		returnFile(path.join(__dirname, '/static/account.html'), res, 200, req, {userStatus:true})
+	}
+});
+
+app.get('/login*', function(req, res) {
+	if (req.user) {
+		res.redirect('/account');
+	} else {
+		returnFile(path.join(__dirname, '/static/login.html'), res, 200, req, {userStatus:true})
+	}
+});
+
 app.get('*', function(req, res, next) {
 	if (req.url.indexOf('/static') != 0) {
 		req.url = path.join('/static', req.url);
@@ -349,12 +365,12 @@ function returnFile(filePath, res, statusCode, req, opts) {
 					file = file.substring(0, ind) + "<script type='text/javascript'>" + initialJS + "</script>" + file.substr(ind);
 					res.writeHead(statusCode, headers);
 
-					res.write(new Buffer(file), "binary");
+					res.write(file);
 					res.end();
 				});
 				return;
 			}
-	
+
 			if (opts.file) {
 				fs.readFile(opts.file, function(err, editFile) {
 					if (err) {
@@ -370,25 +386,36 @@ function returnFile(filePath, res, statusCode, req, opts) {
 					}
 
 					file = file.toString();
+					editFile = editFile.toString();
 					var ind = file.indexOf('<script type=\'text/javascript\'>');
-					var initialJS = "var contents = " + JSON.stringify(file).replace(/script/gi, 'scri" + "pt') + ";";
+					var initialJS = "var contents = " + JSON.stringify(editFile).replace(/script/gi, 'scri" + "pt') + ";";
 					if (opts.userStatus) {
 						initialJS += returnUserInfo(req);
 					}
 
 					file = file.substring(0, ind) + "<script type='text/javascript'>" + initialJS + "</script>" + file.substr(ind);
 					res.writeHead(statusCode, headers);
-
-					res.write(new Buffer(file), "binary");
+					res.write(file);
 					res.end();
 				});
 				return;
 			}
-		}
 
-		res.writeHead(statusCode, headers);
-		res.write(file, "binary");
-		res.end();
+			if (opts.userStatus) {
+				debugger;
+				file = file.toString();
+				var ind = file.indexOf('<script type=\'text/javascript\'>');
+				var initialJS = returnUserInfo(req);
+				file = file.substring(0, ind) + "<script type='text/javascript'>" + initialJS + "</script>" + file.substr(ind);
+				res.writeHead(statusCode, headers);
+				res.write(file);
+				res.end();
+			}
+		} else {
+			res.writeHead(statusCode, headers);
+			res.write(file, "binary");
+			res.end();
+		}
 	});
 }
 

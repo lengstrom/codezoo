@@ -4,7 +4,6 @@
 		<title>Editor</title>
 		<link href='http://fonts.googleapis.com/css?family=Anonymous+Pro:400,700' rel='stylesheet' type='text/css'>
 		<link rel="stylesheet" type="text/css" href="/static/css/style.css">
-		<link rel="stylesheet" type="text/css" href="/static/css/edit.css">
 		<style type="text/css">
 		</style>
 	</head>
@@ -86,10 +85,8 @@
 					editor.textInput.getElement().disabled = true;
 					editor.renderer.$cursorLayer.element.style.opacity = 0;
 					editor.commands.commandKeyBinding = {};
-				} else {
-					window.location = '/view/';
+					$('.title').html($('.title').html() + " [read only]");
 				}
-				$('.title').html($('.title').html() + " [read only]")
 			}
 
 			function save() {
