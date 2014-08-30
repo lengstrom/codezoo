@@ -35,7 +35,7 @@
 		<script type='text/javascript' src='/static/js/jquery.js'></script>
 		<script type='text/javascript' src='/static/js/helpers.js'></script>
 		<script type='text/javascript' src='/static/js/columns.js'></script>
-		<script src="/static/js/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+		<script src="/static/js/ace/ace.js" type="text/javascript"></script>
 		<script type='text/javascript'>
 			$('#toggleSplit').bind('click', toggleColumns);
 			$('#save').bind('click', save);
@@ -74,6 +74,21 @@
 				}
 
 				editor.focus();
+				var isOwner = isOwnerOfDir('/edit');
+				if (isOwner == 0 || 1) {
+					$('#toggleSplit').hide();
+					$('#save').hide();
+					editor.setOptions({
+						readOnly: true,
+						highlightActiveLine: false,
+						highlightGutterLine: false
+					});
+					editor.textInput.getElement().disabled = true;
+					editor.renderer.$cursorLayer.element.style.opacity = 0;
+					editor.commands.commmandKeyBinding = {};
+				} else {
+					window.location = '/view/';
+				}
 			}
 
 			function save() {
@@ -85,9 +100,13 @@
 			}
 
 			function done() {
-				saveFile(function() {
+				if (isOwnerOfDir('/edit')) {
+					saveFile(function() {
+						window.location = '/view' + window.location.pathname.substr('/edit'.length);
+					});
+				} else {
 					window.location = '/view' + window.location.pathname.substr('/edit'.length);
-				});
+				}
 			}
 		</script>
 		<script type="text/javascript" src='/static/js/users.js'></script>

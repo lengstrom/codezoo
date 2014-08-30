@@ -371,8 +371,7 @@ function returnFile(filePath, res, statusCode, req, opts) {
 
 					file = file.toString();
 					var ind = file.indexOf('<script type=\'text/javascript\'>');
-					var initialJS = "var contents = " + JSON.stringify(file) + ';';
-
+					var initialJS = "var contents = " + JSON.stringify(file).replace(/script/gi, 'scri" + "pt') + ";";
 					if (opts.userStatus) {
 						initialJS += returnUserInfo(req);
 					}

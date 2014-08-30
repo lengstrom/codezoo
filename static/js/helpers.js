@@ -24,3 +24,20 @@ function getWritePath() {
 function saveFile(cb) {
 	$.post('/write',{content:editor.getSession().getValue(), path:window.location.pathname}, cb);
 }
+
+function isOwnerOfDir(n) {
+	if (!('user' in window)) return 0;
+	var loc = window.location.pathname;
+	if (loc == n || loc == n + '/') {
+		return -1;
+	}
+
+	loc = loc.substring((n + '/').length);
+	if (loc.charAt(loc.length - 1) != '/') loc += '/';
+	loc = loc.substring(0, loc.indexOf('/'));
+	if (loc == user.account) {
+		return 1;
+	} else {
+		return 0;
+	}
+}

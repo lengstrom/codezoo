@@ -169,21 +169,6 @@
 				}
 			}
 
-			function isOwnerOfDir() {
-				var loc = window.location.pathname;
-				if (loc == '/view' || loc == '/view/') {
-					return -1;
-				}
-				loc = loc.substring('/view/'.length);
-				if (loc.charAt(loc.length - 1) != '/') loc += '/';
-				loc = loc.substring(0, loc.indexOf('/'));
-				if (loc == user.account) {
-					return 1;
-				} else {
-					return 0;
-				}
-			}
-
 			function loadDirs(dirList, target, colWidthCutoff, baseDir) { //
 				if (!dirList) {
 					dirList = [];
@@ -239,7 +224,7 @@
 				}
 
 				dirs = dirs.concat(files);
-				var isOwner = isOwnerOfDir();
+				var isOwner = isOwnerOfDir('/view');
 				for (var i = 0; i < dirs.length; i++) {
 					var subPath = dirs[i];
 					var colNum = Math.floor(i/numCols);
