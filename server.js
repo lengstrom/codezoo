@@ -100,6 +100,31 @@ app.get('/oauth2callback',
 	}
 );
 
+app.post('/chooseName*', function(req, res, next) {
+	var id = req.user.id;
+	var desiredName = req.body.name;
+	if (desiredName.test(/^[A-Za-z0-9]+$/)) {
+		for (var i in userDict) {
+			if (userDict[i] == desiredName) {
+				handleError(res, 550, false);
+				return;
+			}
+		}
+		var prevName = userDict[id];
+		if (prevName) {
+			fs.rename(path.join(storageDir, userDict[id]), path.join(storageDir, desiredName), function(){
+				userDict[id] = desiredName;
+				res.writeHead(200);
+				res.end();
+			});
+		}
+
+		return;
+	}
+
+	handleError(res, 550, false);
+});
+
 app.get('/logout', function(req, res){
 	req.logout();
 	res.redirect('/');
