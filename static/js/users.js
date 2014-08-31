@@ -11,7 +11,6 @@ if ('user' in window) {
 
 	$('.buttons').append(account);
 	$('.buttons').append(logOut);
-	
 } else {
 	var logIn = $("<div>", {class:'button', text:'log in'});
 	logIn.click(function(){
@@ -19,4 +18,8 @@ if ('user' in window) {
 	})
 
 	$('.buttons').append(logIn);
+}
+
+function askUserName() {
+	
 }

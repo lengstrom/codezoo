@@ -95,7 +95,6 @@ app.get('/auth/google',
 app.get('/oauth2callback', 
 	passport.authenticate('google', { failureRedirect: '/login' }),
 	function(req, res) {
-		addUser(req.user.id, 'logan');
 		res.redirect('/');
 	}
 );
@@ -457,11 +456,12 @@ var errorFiles = {
 };
 
 function returnUserInfo(req) {
-	if (req.user && req.user.id) {
-		return 'var user = ' + JSON.stringify({account:userDict[req.user.id]}) + ';'
-	} else {
-		return ''
+	if (req.user) {
+		if (!('id' in req.user)) return 'uNameNotFound'
+		if (((req.user.id) in userDict)) return 'var user = ' + JSON.stringify({account:userDict[req.user.id]}) + ';'
+		return 'var user = {};';
 	}
+	return ''
 }
 
 function handleError(res, type, html, path) {
